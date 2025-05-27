@@ -1,17 +1,17 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from pydub import AudioSegment
 import parselmouth
 import shutil
 import os
 import numpy as np
-import tempfile
-
 
 app = FastAPI()
 
+# CORS: allow frontend requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # or "*"
+    allow_origins=["*"],  # Change to your frontend URL in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -19,10 +19,16 @@ app.add_middleware(
 
 @app.post("/analyze-audio/")
 async def analyze_audio(file: UploadFile = File(...)):
-    with open("temp.wav", "wb") as buffer:
+    input_path = "temp_input"
+    output_path = "temp.wav"
+
+    with open(input_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    sound = parselmouth.Sound("temp.wav")
+    audio = AudioSegment.from_file(input_path)
+    audio.export(output_path, format="wav")
+
+    sound = parselmouth.Sound(output_path)
     pitch = sound.to_pitch()
 
     pitch_values = []
@@ -33,4 +39,8 @@ async def analyze_audio(file: UploadFile = File(...)):
             freq = 0
         pitch_values.append({"time": time, "frequency": freq})
 
+    os.remove(input_path)
+    os.remove(output_path)
+
     return {"pitch": pitch_values}
+
