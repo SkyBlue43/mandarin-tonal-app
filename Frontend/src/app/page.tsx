@@ -12,7 +12,7 @@ export default function Home() {
     const formData = new FormData();
     formData.append('file', blob, '3rd_tone_example_ma.wav');
   
-    const result = await fetch('http://localhost:8000/analyze', {
+    const result = await fetch('http://localhost:8000/analyze-audio', {
       method: 'POST',
       body: formData,
     });

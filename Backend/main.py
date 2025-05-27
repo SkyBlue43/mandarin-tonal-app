@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import parselmouth
 import shutil
 import os
+import numpy as np
 import tempfile
 
 
@@ -28,6 +29,8 @@ async def analyze_audio(file: UploadFile = File(...)):
     for i in range(pitch.get_number_of_frames()):
         time = pitch.get_time_from_frame_number(i + 1)
         freq = pitch.get_value_in_frame(i + 1)
+        if np.isnan(freq):
+            freq = 0
         pitch_values.append({"time": time, "frequency": freq})
 
     return {"pitch": pitch_values}
