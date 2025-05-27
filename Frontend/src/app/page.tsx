@@ -3,9 +3,29 @@
 import { Mic, Play } from 'lucide-react';
 
 export default function Home() {
+
+
+  const analyzeAudio = async () => {
+    const response = await fetch('/audio/3rd_tone_example_ma.wav');
+    const blob = await response.blob();
+  
+    const formData = new FormData();
+    formData.append('file', blob, '3rd_tone_example_ma.wav');
+  
+    const result = await fetch('http://localhost:8000/analyze', {
+      method: 'POST',
+      body: formData,
+    });
+  
+    const data = await result.json();
+    console.log('Pitch data:', data);
+  };
+  
+
   const handlePlay = () => {
     const audio = new Audio('/audio/3rd_tone_example_ma.wav');
     audio.play();
+    analyzeAudio();
   };
 
 
