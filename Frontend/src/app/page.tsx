@@ -9,11 +9,11 @@ export default function Home() {
 
   const analyzeAudio = async () => {
 
-    const response = await fetch('/audio/3rd_tone_example_ma.wav');
+    const response = await fetch('/audio/3rd_tone_ma.wav');
     const blob = await response.blob();
 
     const formData = new FormData();
-    formData.append('file', blob, '3rd_tone_example_ma.wav');
+    formData.append('file', blob, '3rd_tone_ma.wav');
 
     const result = await fetch('http://localhost:8000/analyze-audio', {
       method: 'POST',
@@ -27,10 +27,13 @@ export default function Home() {
 
 
   const handlePlay = () => {
-    const audio = new Audio('/audio/3rd_tone_example_ma.wav');
+    const audio = new Audio('/audio/3rd_tone_ma.wav');
     audio.play();
     analyzeAudio();
   };
+
+  const handleRecord = () => {
+  }
 
 
   return (
