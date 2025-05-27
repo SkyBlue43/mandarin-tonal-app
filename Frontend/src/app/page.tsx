@@ -1,26 +1,30 @@
 'use client'
 
+import { useState } from 'react'
 import { Mic, Play } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 export default function Home() {
-
+  const [pitchData, setPitchData] = useState([]);
 
   const analyzeAudio = async () => {
+
     const response = await fetch('/audio/3rd_tone_example_ma.wav');
     const blob = await response.blob();
-  
+
     const formData = new FormData();
     formData.append('file', blob, '3rd_tone_example_ma.wav');
-  
+
     const result = await fetch('http://localhost:8000/analyze-audio', {
       method: 'POST',
       body: formData,
     });
-  
+
     const data = await result.json();
     console.log('Pitch data:', data);
+    setPitchData(data.pitch);
   };
-  
+
 
   const handlePlay = () => {
     const audio = new Audio('/audio/3rd_tone_example_ma.wav');
@@ -37,7 +41,14 @@ export default function Home() {
           <Play />
         </button>
         </div>
-        <div></div>
+        {pitchData.length > 0 && (
+          <LineChart width={600} height={300} data={pitchData}>
+            <XAxis dataKey="time" />
+            <YAxis />
+            <Tooltip />
+            <Line type="monotone" dataKey="frequency" stroke="#8884d8" dot={false} />
+          </LineChart>
+        )}
         <div><button className="p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 items-center justify-center">
           <Mic />
         </button></div>
