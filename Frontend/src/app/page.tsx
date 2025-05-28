@@ -5,7 +5,13 @@ import { Mic, Play, Square } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 export default function Home() {
-  const [pitchData, setPitchData] = useState([]);
+  type PitchPoint = {
+    time: number;
+    frequency: number;
+  };
+
+  const [userPitch, setUserPitch] = useState<PitchPoint[]>([]);
+  const [referencePitch, setReferencePitch] = useState<PitchPoint[]>([]);
   const [recording, setRecording] = useState(false);
   const [audioURL, setAudioURL] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -20,7 +26,7 @@ export default function Home() {
     });
     const data = await result.json();
     console.log('Pitch data:', data);
-    setPitchData(data.pitch);
+    return data
   };
 
 
@@ -29,7 +35,8 @@ export default function Home() {
     audio.play();
     const response = await fetch('/audio/3rd_tone_ma.wav');
     const blob = await response.blob();
-    analyzeAudio(blob, '3rd_tone_ma.wav');
+    const data = await analyzeAudio(blob, '3rd_tone_ma.wav');
+    setReferencePitch(data.pitch);
   };
 
 
@@ -40,11 +47,12 @@ export default function Home() {
     mediaRecorder.ondataavailable = (event) => {
       audioChunks.current.push(event.data);
     };
-    mediaRecorder.onstop = () => {
+    mediaRecorder.onstop = async () => {
       const audioBlob = new Blob(audioChunks.current, { type: 'audio/wav' });
       const url = URL.createObjectURL(audioBlob);
       setAudioURL(url);
-      analyzeAudio(audioBlob, 'recorded_audio.wav');
+      const data = await analyzeAudio(audioBlob, 'recorded_audio.wav');
+      setUserPitch(data.pitch);
     };
     audioChunks.current = [];
     mediaRecorder.start();
@@ -56,6 +64,12 @@ export default function Home() {
     setRecording(false);
   };
 
+  const mergedPitchData = userPitch.map((point, index) => ({
+    time: point.time,
+    user: point.frequency,
+    reference: referencePitch[index]?.frequency ?? 0,  // handle mismatch
+  }));
+
 
   return (
     <main className="flex flex-col items-center justify-center h-screen text-[50px]">
@@ -65,8 +79,8 @@ export default function Home() {
           <Play />
         </button>
         </div>
-        {pitchData.length > 0 && (
-          <LineChart width={600} height={300} data={pitchData}>
+        {referencePitch.length > 0 && (
+          <LineChart width={600} height={300} data={referencePitch}>
             <XAxis dataKey="time" />
             <YAxis />
             <Tooltip />
@@ -80,7 +94,17 @@ export default function Home() {
         >
           {recording ? <Square /> : <Mic />}
         </button></div>
-        <div></div>
+        <div>{userPitch.length > 0 && (
+          <LineChart width={600} height={300} data={mergedPitchData}>
+          <XAxis dataKey="time" />
+          <YAxis />
+          <Tooltip />
+          <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+          <Line type="monotone" dataKey="user" stroke="#8884d8" dot={false} name="Your Pitch" />
+          <Line type="monotone" dataKey="reference" stroke="#82ca9d" dot={false} name="Reference Pitch" />
+        </LineChart>
+        )}
+        </div>
       </div>
     </main>
   );
