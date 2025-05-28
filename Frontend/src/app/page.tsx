@@ -80,9 +80,6 @@ export default function Home() {
         >
           {recording ? <Square /> : <Mic />}
         </button></div>
-        {audioURL && (
-          <audio controls src={audioURL} className="mt-4" />
-        )}
         <div></div>
       </div>
     </main>
