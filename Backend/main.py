@@ -37,7 +37,8 @@ async def analyze_audio(file: UploadFile = File(...)):
         freq = pitch.get_value_in_frame(i + 1)
         if np.isnan(freq):
             freq = 0
-        pitch_values.append({"time": time, "frequency": freq})
+        else:
+            pitch_values.append({"time": time, "frequency": freq})
 
     os.remove(input_path)
     os.remove(output_path)
