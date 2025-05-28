@@ -75,18 +75,21 @@ export default function Home() {
     <main className="flex flex-col items-center justify-center h-screen text-[50px]">
       <h1>mǎ 馬</h1>
       <div className="grid grid-cols-2 gap-4">
+
         <div><button className="p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600" onClick={handlePlay}>
           <Play />
         </button>
         </div>
-        {referencePitch.length > 0 && (
+
+        <div>{referencePitch.length > 0 && (
           <LineChart width={600} height={300} data={referencePitch}>
             <XAxis dataKey="time" />
             <YAxis />
             <Tooltip />
             <Line type="monotone" dataKey="frequency" stroke="#8884d8" dot={false} />
           </LineChart>
-        )}
+        )}</div>
+
         <div><button
           className={`p-4 rounded-full text-white ${recording ? 'bg-red-500' : 'bg-green-500'
             }`}
@@ -94,17 +97,17 @@ export default function Home() {
         >
           {recording ? <Square /> : <Mic />}
         </button></div>
+
         <div>{userPitch.length > 0 && (
           <LineChart width={600} height={300} data={mergedPitchData}>
-          <XAxis dataKey="time" />
-          <YAxis />
-          <Tooltip />
-          <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-          <Line type="monotone" dataKey="user" stroke="#8884d8" dot={false} name="Your Pitch" />
-          <Line type="monotone" dataKey="reference" stroke="#82ca9d" dot={false} name="Reference Pitch" />
-        </LineChart>
-        )}
-        </div>
+            <XAxis dataKey="time" />
+            <YAxis />
+            <Tooltip />
+            <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+            <Line type="monotone" dataKey="user" stroke="#8884d8" dot={false} name="Your Pitch" />
+            <Line type="monotone" dataKey="reference" stroke="#82ca9d" dot={false} name="Reference Pitch" />
+          </LineChart>
+        )}</div>
       </div>
     </main>
   );
