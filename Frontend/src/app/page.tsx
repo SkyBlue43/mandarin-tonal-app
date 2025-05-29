@@ -83,11 +83,10 @@ export default function Home() {
         </div>
 
         <div>{referencePitch.length > 0 && (
-          <LineChart width={600} height={300} data={referencePitch}>
-            <XAxis dataKey="time" />
-            <YAxis />
-            <Tooltip />
-            <Line type="monotone" dataKey="frequency" stroke="#8884d8" dot={false} />
+          <LineChart width={400} height={300} data={referencePitch}>
+            <XAxis dataKey="time" tick={{ fontSize: 14 }}/>
+            <YAxis tick={{ fontSize: 14 }}/>
+            <Line type="monotone" dataKey="frequency" stroke="#8884d8" dot={false} strokeWidth={5} />
           </LineChart>
         )}</div>
 
@@ -99,13 +98,11 @@ export default function Home() {
         </button></div>
 
         <div>{userPitch.length > 0 && (
-          <LineChart width={600} height={300} data={mergedPitchData}>
-            <XAxis dataKey="time" />
-            <YAxis />
-            <Tooltip />
-            <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-            <Line type="monotone" dataKey="user" stroke="#8884d8" dot={false} name="Your Pitch" />
-            <Line type="monotone" dataKey="reference" stroke="#82ca9d" dot={false} name="Reference Pitch" />
+          <LineChart width={400} height={300} data={mergedPitchData}>
+            <XAxis dataKey="time" tick={{ fontSize: 14 }}/>
+            <YAxis tick={{ fontSize: 14 }}/>
+            <Line type="monotone" dataKey="user" stroke="#82ca9d" dot={false} name="Your Pitch" strokeWidth={5}/>
+            <Line type="monotone" dataKey="reference" stroke="#8884d8" dot={false} name="Reference Pitch" strokeWidth={5}/>
           </LineChart>
         )}</div>
       </div>
