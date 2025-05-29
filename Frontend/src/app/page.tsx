@@ -72,11 +72,12 @@ export default function Home() {
 
 
   return (
-    <main className="flex flex-col items-center justify-center h-screen text-[50px]">
+    <main className="flex flex-col items-center justify-center min-h-screen w-screen text-[50px]">
       <h1>mǎ 馬</h1>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 grid-rows-2 gap-4 w-full px-8 h-[600px]">
 
-        <div><button className="p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600" onClick={handlePlay}>
+        <div className='flex justify-center items-center w-full h-full'>
+          <button className="p-4 rounded-full bg-blue-500 text-white hover:bg-blue-600" onClick={handlePlay}>
           <Play />
         </button>
         </div>
@@ -90,11 +91,10 @@ export default function Home() {
           </LineChart>
         )}</div>
 
-        <div><button
-          className={`p-4 rounded-full text-white ${recording ? 'bg-red-500' : 'bg-green-500'
-            }`}
-          onClick={recording ? stopRecording : startRecording}
-        >
+        <div className='flex justify-center items-center w-full h-full'>
+          <button
+          className={`p-4 rounded-full text-white ${recording ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
+          onClick={recording ? stopRecording : startRecording}>
           {recording ? <Square /> : <Mic />}
         </button></div>
 
