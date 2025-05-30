@@ -67,7 +67,7 @@ export default function Home() {
   const mergedPitchData = userPitch.map((point, index) => ({
     time: point.time,
     user: point.frequency,
-    reference: referencePitch[index]?.frequency ?? 0,  // handle mismatch
+    reference: referencePitch[index]?.frequency ?? undefined,  // handle mismatch
   }));
 
 
