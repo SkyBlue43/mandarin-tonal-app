@@ -36,7 +36,8 @@ export default function Home() {
     const response = await fetch('/audio/3rd_tone_ma.wav');
     const blob = await response.blob();
     const data = await analyzeAudio(blob, '3rd_tone_ma.wav');
-    setReferencePitch(data.pitch);
+    const normalizedUserPitch = normalizePitch(data.pitch);
+    setReferencePitch(normalizedUserPitch);
   };
 
 
@@ -52,7 +53,8 @@ export default function Home() {
       const url = URL.createObjectURL(audioBlob);
       setAudioURL(url);
       const data = await analyzeAudio(audioBlob, 'recorded_audio.wav');
-      setUserPitch(data.pitch);
+      const normalizedUserPitch = normalizePitch(data.pitch);
+      setUserPitch(normalizedUserPitch);
     };
     audioChunks.current = [];
     mediaRecorder.start();
@@ -70,6 +72,22 @@ export default function Home() {
     reference: referencePitch[index]?.frequency ?? undefined,  // handle mismatch
   }));
 
+  const normalizePitch = (pitchData: { time: number; frequency: number }[]) => {
+    const validPoints = pitchData.filter(p => p.frequency != null);
+    if (validPoints.length === 0) return pitchData;
+
+    const mean = validPoints.reduce((sum, p) => sum + (p.frequency ?? 0), 0) / validPoints.length;
+
+    return pitchData
+      .filter(p => p.frequency != null)
+      .map(p => ({
+        ...p,
+        frequency: (p.frequency as number) - mean,
+      }));
+  };
+
+
+
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen w-screen text-[50px]">
@@ -78,31 +96,31 @@ export default function Home() {
 
         <div className='flex justify-center items-center w-full h-full'>
           <button className="p-4 rounded-full bg-blue-500 text-white hover:bg-blue-600" onClick={handlePlay}>
-          <Play />
-        </button>
+            <Play />
+          </button>
         </div>
 
         <div>{referencePitch.length > 0 && (
           <LineChart width={400} height={300} data={referencePitch}>
-            <XAxis dataKey="time" tick={{ fontSize: 14 }}/>
-            <YAxis tick={{ fontSize: 14 }}/>
+            <XAxis dataKey="time" tick={{ fontSize: 14 }} />
+            <YAxis tick={{ fontSize: 14 }} />
             <Line type="monotone" dataKey="frequency" stroke="#8884d8" dot={false} strokeWidth={5} />
           </LineChart>
         )}</div>
 
         <div className='flex justify-center items-center w-full h-full'>
           <button
-          className={`p-4 rounded-full text-white ${recording ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
-          onClick={recording ? stopRecording : startRecording}>
-          {recording ? <Square /> : <Mic />}
-        </button></div>
+            className={`p-4 rounded-full text-white ${recording ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
+            onClick={recording ? stopRecording : startRecording}>
+            {recording ? <Square /> : <Mic />}
+          </button></div>
 
         <div>{userPitch.length > 0 && (
           <LineChart width={400} height={300} data={mergedPitchData}>
-            <XAxis dataKey="time" tick={{ fontSize: 14 }}/>
-            <YAxis tick={{ fontSize: 14 }}/>
-            <Line type="monotone" dataKey="user" stroke="#82ca9d" dot={false} name="Your Pitch" strokeWidth={5}/>
-            <Line type="monotone" dataKey="reference" stroke="#8884d8" dot={false} name="Reference Pitch" strokeWidth={5}/>
+            <XAxis dataKey="time" tick={{ fontSize: 14 }} />
+            <YAxis tick={{ fontSize: 14 }} />
+            <Line type="monotone" dataKey="user" stroke="#82ca9d" dot={false} name="Your Pitch" strokeWidth={5} />
+            <Line type="monotone" dataKey="reference" stroke="#8884d8" dot={false} name="Reference Pitch" strokeWidth={5} />
           </LineChart>
         )}</div>
       </div>
