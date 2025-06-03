@@ -87,6 +87,22 @@ export default function Home() {
   };
 
 
+  function countMatches(userPitch: PitchPoint[], referencePitch: PitchPoint[], tolerance = 15): number {
+    let totalPoints = 0;
+    let correctPoints = 0
+
+    userPitch.forEach((point, index) => {
+      totalPoints += 1;
+      const refPoint = referencePitch[index];
+      if (refPoint && Math.abs(point.frequency - refPoint.frequency) < tolerance) {
+        correctPoints += 1;
+      }
+    });
+
+    return totalPoints > 0 ? correctPoints / totalPoints : 0;
+  }
+
+
 
 
   return (
@@ -116,12 +132,17 @@ export default function Home() {
           </button></div>
 
         <div>{userPitch.length > 0 && (
-          <LineChart width={400} height={300} data={mergedPitchData}>
-            <XAxis dataKey="time" tick={{ fontSize: 14 }} />
-            <YAxis tick={{ fontSize: 14 }} />
-            <Line type="monotone" dataKey="user" stroke="#82ca9d" dot={false} name="Your Pitch" strokeWidth={5} />
-            <Line type="monotone" dataKey="reference" stroke="#8884d8" dot={false} name="Reference Pitch" strokeWidth={5} />
-          </LineChart>
+          <>
+            <LineChart width={400} height={300} data={mergedPitchData}>
+              <XAxis dataKey="time" tick={{ fontSize: 14 }} />
+              <YAxis tick={{ fontSize: 14 }} />
+              <Line type="monotone" dataKey="user" stroke="#82ca9d" dot={false} name="Your Pitch" strokeWidth={5} />
+              <Line type="monotone" dataKey="reference" stroke="#8884d8" dot={false} name="Reference Pitch" strokeWidth={5} />
+            </LineChart>
+            <p className="text-lg mt-2 text-center text-white">
+              You were {(countMatches(userPitch, referencePitch) * 100).toFixed(1)}% accurate!
+            </p>
+          </>
         )}</div>
       </div>
     </main>
