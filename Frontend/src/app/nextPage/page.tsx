@@ -32,11 +32,11 @@ export default function NextPage() {
 
 
   const handlePlay = async () => {
-    const audio = new Audio('/audio/3rd_tone_ma.wav');
+    const audio = new Audio('/audio/chinese_output.mp3');
     audio.play();
-    const response = await fetch('/audio/3rd_tone_ma.wav');
+    const response = await fetch('/audio/chinese_output.mp3');
     const blob = await response.blob();
-    const data = await analyzeAudio(blob, '3rd_tone_ma.wav');
+    const data = await analyzeAudio(blob, 'chinese_output.mp3');
     const normalizedUserPitch = normalizePitch(data.pitch);
     setReferencePitch(normalizedUserPitch);
   };
@@ -108,7 +108,7 @@ export default function NextPage() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen w-screen text-[50px]">
-      <h1>mǎ 馬 马</h1>
+      <h1>你好！欢迎来到语音练习。</h1>
       <div className="grid grid-cols-2 grid-rows-2 gap-4 w-full px-8 h-[600px]">
 
         <div className='flex justify-center items-center w-full h-full'>
@@ -118,7 +118,7 @@ export default function NextPage() {
         </div>
 
         <div>{referencePitch.length > 0 && (
-          <LineChart width={400} height={300} data={referencePitch}>
+          <LineChart width={800} height={300} data={referencePitch}>
             <XAxis dataKey="time" tick={{ fontSize: 14 }} />
             <YAxis tick={{ fontSize: 14 }} />
             <Line type="monotone" dataKey="frequency" stroke="#8884d8" dot={false} strokeWidth={5} />
@@ -134,7 +134,7 @@ export default function NextPage() {
 
         <div>{userPitch.length > 0 && (
           <>
-            <LineChart width={400} height={300} data={mergedPitchData}>
+            <LineChart width={800} height={300} data={mergedPitchData}>
               <XAxis dataKey="time" tick={{ fontSize: 14 }} />
               <YAxis tick={{ fontSize: 14 }} />
               <Line type="monotone" dataKey="user" stroke="#82ca9d" dot={false} name="Your Pitch" strokeWidth={5} />
