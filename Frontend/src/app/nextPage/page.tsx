@@ -5,7 +5,7 @@ import { useState, useRef } from 'react'
 import { Mic, Play, Square } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
-export default function Home() {
+export default function NextPage() {
   type PitchPoint = {
     time: number;
     frequency: number;
@@ -145,7 +145,7 @@ export default function Home() {
             </p>
             <div>
               {(countMatches(userPitch, referencePitch) * 100) > 90 && (
-                <button className='bg-100-green text-lg text-center rounded-3xl' onClick={() => router.push('/nextPage')}>
+                <button className='bg-100-green text-lg text-center rounded-3xl' onClick={() => router.push('/page')}>
                   Success! Next?
                 </button>
               )}</div>
@@ -155,4 +155,3 @@ export default function Home() {
     </main>
   );
 }
-
