@@ -145,7 +145,7 @@ export default function Home() {
             </p>
             <div>
               {(countMatches(userPitch, referencePitch) * 100) > 90 && (
-                <button className='bg-100-green text-lg text-center rounded-3xl' onClick={() => router.push('/nextPage')}>
+                <button className='bg-green-500 p-4 text-lg text-center rounded-3xl' onClick={() => router.push('/nextPage')}>
                   Success! Next?
                 </button>
               )}</div>
