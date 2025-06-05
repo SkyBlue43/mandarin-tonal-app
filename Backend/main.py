@@ -71,19 +71,27 @@ async def dtw(
     ref_tuples = list(zip(ref_pitch))
     user_tuples = list(zip(user_pitch))
 
+    # Calculate DTW path
     distance, path = fastdtw(ref_tuples, user_tuples, dist=euclidean)
 
-    # Build aligned output using path indices
-    aligned_ref = [reference_data["frequency"][i] for i, _ in path]
-    aligned_user = [user_data["frequency"][j] for _, j in path]
+    # Create dict to map ref index to list of user frequencies that match
+    user_aligned = {}
+    for i, j in path:
+        if i not in user_aligned:
+            user_aligned[i] = []
+        user_aligned[i].append(user_data["frequency"][j])
 
-    # Optional: make up a fake time axis just for plotting
-    time_axis = list(range(len(path)))
-
-    aligned_points = [
-        {"time": t, "reference": ref, "user": user}
-        for t, ref, user in zip(time_axis, aligned_ref, aligned_user)
-    ]
+    # Average user values at each reference point
+    aligned_points = []
+    for i, ref_freq in enumerate(reference_data["frequency"]):
+        time = reference_data["time"][i]
+        user_vals = user_aligned.get(i, [])
+        user_freq = np.mean(user_vals) if user_vals else None
+        aligned_points.append({
+            "time": time,
+            "reference": ref_freq,
+            "user": user_freq
+        })
 
     return {
         "distance": distance,
