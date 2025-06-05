@@ -17,6 +17,7 @@ export default function Home() {
   const [audioURL, setAudioURL] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
+  const [alignedGraphData, setAlignedGraphData] = useState<any[]>([]);
 
   const analyzeAudio = async (audio_blob: Blob, audio_location: string) => {
     const formData = new FormData();
@@ -30,6 +31,26 @@ export default function Home() {
     return data
   };
 
+  const DTW = async (userPitch: PitchPoint[], referencePitch: PitchPoint[]) => {
+    const formData = new FormData();
+    formData.append('data_reference', JSON.stringify({
+      frequency: referencePitch.map(p => p.frequency),
+      time: referencePitch.map(p => p.time)
+    }));
+    formData.append('data_user', JSON.stringify({
+      frequency: userPitch.map(p => p.frequency),
+      time: userPitch.map(p => p.time)
+    })); 
+    const result = await fetch('http://localhost:8000/dtw', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await result.json();
+    console.log("DTW result:", data);
+    setAlignedGraphData(data.aligned);
+  };
+
+
 
   const handlePlay = async () => {
     const audio = new Audio('/audio/3rd_tone_ma.wav');
@@ -37,8 +58,8 @@ export default function Home() {
     const response = await fetch('/audio/3rd_tone_ma.wav');
     const blob = await response.blob();
     const data = await analyzeAudio(blob, '3rd_tone_ma.wav');
-    const normalizedUserPitch = normalizePitch(data.pitch);
-    setReferencePitch(normalizedUserPitch);
+    //const normalizedUserPitch = normalizePitch(data.pitch);
+    setReferencePitch(data.pitch);
   };
 
 
@@ -54,8 +75,9 @@ export default function Home() {
       const url = URL.createObjectURL(audioBlob);
       setAudioURL(url);
       const data = await analyzeAudio(audioBlob, 'recorded_audio.wav');
-      const normalizedUserPitch = normalizePitch(data.pitch);
-      setUserPitch(normalizedUserPitch);
+      //const normalizedUserPitch = normalizePitch(data.pitch);
+      setUserPitch(data.pitch);
+      DTW(data.pitch, referencePitch);
     };
     audioChunks.current = [];
     mediaRecorder.start();
@@ -67,39 +89,37 @@ export default function Home() {
     setRecording(false);
   };
 
-  const mergedPitchData = userPitch.map((point, index) => ({
-    time: point.time,
-    user: point.frequency,
-    reference: referencePitch[index]?.frequency ?? undefined,  // handle mismatch
-  }));
+  // const mergedPitchData = userPitch.map((point, index) => ({
+  //   time: point.time,
+  //   user: point.frequency,
+  //   reference: referencePitch[index]?.frequency ?? undefined,  // handle mismatch
+  // }));
 
-  const normalizePitch = (pitchData: { time: number; frequency: number }[]) => {
-    const validPoints = pitchData.filter(p => p.frequency != null);
-    if (validPoints.length === 0) return pitchData;
+  // const normalizePitch = (pitchData: { time: number; frequency: number }[]) => {
+  //   const validPoints = pitchData.filter(p => p.frequency != null);
+  //   if (validPoints.length === 0) return pitchData;
 
-    const mean = validPoints.reduce((sum, p) => sum + (p.frequency ?? 0), 0) / validPoints.length;
+  //   const mean = validPoints.reduce((sum, p) => sum + (p.frequency ?? 0), 0) / validPoints.length;
 
-    return pitchData
-      .filter(p => p.frequency != null)
-      .map(p => ({
-        ...p,
-        frequency: (p.frequency as number) - mean,
-      }));
-  };
+  //   return pitchData
+  //     .filter(p => p.frequency != null)
+  //     .map(p => ({
+  //       ...p,
+  //       frequency: (p.frequency as number) - mean,
+  //     }));
+  // };
 
 
-  function countMatches(userPitch: PitchPoint[], referencePitch: PitchPoint[], tolerance = 15): number {
-    let totalPoints = 0;
-    let correctPoints = 0
-
-    userPitch.forEach((point, index) => {
-      totalPoints += 1;
-      const refPoint = referencePitch[index];
-      if (refPoint && Math.abs(point.frequency - refPoint.frequency) < tolerance) {
+  function countMatches(aligned: any[], tolerance = 15): number {
+    let totalPoints = aligned.length;
+    let correctPoints = 0;
+  
+    aligned.forEach(pair => {
+      if (Math.abs(pair.user - pair.reference) < tolerance) {
         correctPoints += 1;
       }
     });
-
+  
     return totalPoints > 0 ? correctPoints / totalPoints : 0;
   }
 
@@ -132,19 +152,19 @@ export default function Home() {
             {recording ? <Square /> : <Mic />}
           </button></div>
 
-        <div>{userPitch.length > 0 && (
+        <div>{Array.isArray(alignedGraphData) && alignedGraphData.length > 0 && (
           <>
-            <LineChart width={400} height={300} data={mergedPitchData}>
+            <LineChart width={400} height={300} data={alignedGraphData}>
               <XAxis dataKey="time" tick={{ fontSize: 14 }} />
               <YAxis tick={{ fontSize: 14 }} />
               <Line type="monotone" dataKey="user" stroke="#82ca9d" dot={false} name="Your Pitch" strokeWidth={5} />
               <Line type="monotone" dataKey="reference" stroke="#8884d8" dot={false} name="Reference Pitch" strokeWidth={5} />
             </LineChart>
             <p className="text-lg mt-2 text-center text-white">
-              You were {(countMatches(userPitch, referencePitch) * 100).toFixed(1)}% accurate!
+              You were {(countMatches(alignedGraphData) * 100).toFixed(1)}% accurate!
             </p>
             <div>
-              {(countMatches(userPitch, referencePitch) * 100) > 90 && (
+              {(countMatches(alignedGraphData) * 100) > 90 && (
                 <button className='bg-green-500 p-4 text-lg text-center rounded-3xl' onClick={() => router.push('/nextPage')}>
                   Success! Next?
                 </button>
