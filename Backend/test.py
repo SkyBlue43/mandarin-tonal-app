@@ -2,7 +2,7 @@ from gtts import gTTS
 from playsound import playsound
 
 # Text to synthesize
-text = "你好！欢迎来到语音练习。"
+text = "馬"
 text2 = "Hello there"
 text3 = "Sou muito grato para você"
 

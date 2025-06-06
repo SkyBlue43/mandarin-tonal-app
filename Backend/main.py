@@ -93,6 +93,16 @@ async def dtw(
             "user": user_freq
         })
 
+    valid_user_freqs = [pt["user"] for pt in aligned_points if pt["user"] is not None]
+    if valid_user_freqs:
+        ref_mean = np.mean(reference_data['frequency'])
+        user_mean = np.mean(valid_user_freqs)
+        shift = ref_mean - user_mean
+
+        for pt in aligned_points:
+            if pt["user"] is not None:
+                pt["user"] += shift
+
     return {
         "distance": distance,
         "aligned": aligned_points

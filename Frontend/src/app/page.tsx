@@ -53,11 +53,11 @@ export default function Home() {
 
 
   const handlePlay = async () => {
-    const audio = new Audio('/audio/3rd_tone_ma.wav');
+    const audio = new Audio('/audio/chinese_output.mp3');
     audio.play();
-    const response = await fetch('/audio/3rd_tone_ma.wav');
+    const response = await fetch('/audio/chinese_output.mp3');
     const blob = await response.blob();
-    const data = await analyzeAudio(blob, '3rd_tone_ma.wav');
+    const data = await analyzeAudio(blob, 'chinese_output.mp3');
     //const normalizedUserPitch = normalizePitch(data.pitch);
     setReferencePitch(data.pitch);
   };
