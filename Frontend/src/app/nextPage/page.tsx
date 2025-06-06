@@ -89,26 +89,6 @@ export default function NextPage() {
     setRecording(false);
   };
 
-  // const mergedPitchData = userPitch.map((point, index) => ({
-  //   time: point.time,
-  //   user: point.frequency,
-  //   reference: referencePitch[index]?.frequency ?? undefined,  // handle mismatch
-  // }));
-
-  // const normalizePitch = (pitchData: { time: number; frequency: number }[]) => {
-  //   const validPoints = pitchData.filter(p => p.frequency != null);
-  //   if (validPoints.length === 0) return pitchData;
-
-  //   const mean = validPoints.reduce((sum, p) => sum + (p.frequency ?? 0), 0) / validPoints.length;
-
-  //   return pitchData
-  //     .filter(p => p.frequency != null)
-  //     .map(p => ({
-  //       ...p,
-  //       frequency: (p.frequency as number) - mean,
-  //     }));
-  // };
-
 
   function countMatches(aligned: any[], tolerance = 15): number {
     let totalPoints = aligned.length;
@@ -122,8 +102,6 @@ export default function NextPage() {
   
     return totalPoints > 0 ? correctPoints / totalPoints : 0;
   }
-
-
 
 
   return (
