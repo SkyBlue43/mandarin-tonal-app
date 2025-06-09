@@ -18,6 +18,7 @@ export default function Home() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
 
+  
   const analyzeAudio = async (audio_blob: Blob, audio_location: string) => {
     const formData = new FormData();
     formData.append('file', audio_blob, audio_location);
@@ -102,8 +103,6 @@ export default function Home() {
 
     return totalPoints > 0 ? correctPoints / totalPoints : 0;
   }
-
-
 
 
   return (
