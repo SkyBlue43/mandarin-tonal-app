@@ -53,11 +53,11 @@ export default function NextPage() {
 
 
   const handlePlay = async () => {
-    const audio = new Audio('/audio/portuguese_output.mp3');
+    const audio = new Audio('/audio/chinese_phrase.mp3');
     audio.play();
-    const response = await fetch('/audio/portuguese_output.mp3');
+    const response = await fetch('/audio/chinese_phrase.mp3');
     const blob = await response.blob();
-    const data = await analyzeAudio(blob, 'portuguese_output.mp3');
+    const data = await analyzeAudio(blob, 'chinese_phrase.mp3');
     //const normalizedUserPitch = normalizePitch(data.pitch);
     setReferencePitch(data.pitch);
   };
@@ -90,7 +90,7 @@ export default function NextPage() {
   };
 
 
-  function countMatches(aligned: any[], tolerance = 15): number {
+  function countMatches(aligned: any[], tolerance = 30): number {
     let totalPoints = aligned.length;
     let correctPoints = 0;
   
@@ -106,7 +106,8 @@ export default function NextPage() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen w-screen text-[50px]">
-      <h1>Sou muito grato para você</h1>
+      <h1>你好！你今天怎么样？</h1>
+      <h1>(Nǐ hǎo! Nǐ jīntiān zěnmeyàng?)</h1>
       <div className="grid grid-cols-2 grid-rows-2 gap-4 w-full px-8 h-[600px]">
 
         <div className='flex justify-center items-center w-full h-full'>
