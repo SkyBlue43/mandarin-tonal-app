@@ -31,15 +31,30 @@ export default function Home() {
     return data
   };
 
+  const getDataMFA = async (audio_blob: Blob, audio_location: string, audio_text: string) => {
+    const formData = new FormData();
+    formData.append('file', audio_blob, audio_location);
+    formData.append('transcript', audio_text);
+    const result = await fetch('http://localhost:8000/mfa', {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await result.json();
+    console.log("MFA data:", data);
+    return data
+  };
+
 
   const handlePlay = async () => {
-    const audio = new Audio('/audio/3rd_tone_ma.wav');
+    const audio = new Audio('/audio/3rd_tone_example_ma.wav');
     audio.play();
-    const response = await fetch('/audio/3rd_tone_ma.wav');
+    const response = await fetch('/audio/3rd_tone_example_ma.wav');
     const blob = await response.blob();
-    const data = await analyzeAudio(blob, '3rd_tone_ma.wav');
+    const data = await analyzeAudio(blob, '3rd_tone_example_ma.wav');
     const normalizedUserPitch = normalizePitch(data.pitch);
     setReferencePitch(normalizedUserPitch);
+
+    const dataMFA = await getDataMFA(blob, '3rd_tone_ma.wav', '馬')
   };
 
 
