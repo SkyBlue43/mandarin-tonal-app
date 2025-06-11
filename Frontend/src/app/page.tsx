@@ -108,7 +108,7 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen w-screen text-[50px]">
-      <h1>mǎ 馬 马</h1>
+      <h1>mǎ2 馬 马</h1>
       <div className="grid grid-cols-2 grid-rows-2 gap-4 w-full px-8 h-[600px]">
 
         <div className='flex justify-center items-center w-full h-full'>
