@@ -16,6 +16,8 @@ export default function Home() {
   const [audioURL, setAudioURL] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
+  const [showPinyin, setShowPinyin] = useState(false);
+
 
   const analyzeAudio = async (audio_blob: Blob, audio_location: string) => {
     const formData = new FormData();
@@ -82,7 +84,19 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen w-screen text-[50px]">
-      <h1>mǎ 馬</h1>
+      <h1>馬  </h1>
+      <div className="flex items-center gap-4 mb-4">
+    {showPinyin && (
+      <span className="text-gray-500 text-[30px]">mǎ</span>
+    )}
+    <button
+      className="px-4 py-2 bg-gray-200 text-sm rounded hover:bg-gray-300"
+      onClick={() => setShowPinyin(!showPinyin)}
+    >
+      {showPinyin ? "Hide Pinyin" : "Show Pinyin"}
+    </button>
+  </div>
+
       <div className="grid grid-cols-2 grid-rows-2 gap-4 w-full px-8 h-[600px]">
 
         <div className='flex justify-center items-center w-full h-full'>
@@ -90,6 +104,7 @@ export default function Home() {
           <Play />
         </button>
         </div>
+        
 
         <div>{referencePitch.length > 0 && (
           <LineChart width={400} height={300} data={referencePitch}>
@@ -132,4 +147,5 @@ export default function Home() {
     </main>
   );
 }
+
 
