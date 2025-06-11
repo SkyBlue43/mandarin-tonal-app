@@ -117,7 +117,7 @@ export default function Home() {
       <RotateCcw />
     </button>
   )}
-        
+        {audioURL && <audio controls src={audioURL} />}
         </div>
 
         <div>{userPitch.length > 0 && (
