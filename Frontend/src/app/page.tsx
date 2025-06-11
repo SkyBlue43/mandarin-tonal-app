@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Mic, Play, Square } from 'lucide-react';
+import { Mic, Play, Square, RotateCcw } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 export default function Home() {
@@ -39,6 +39,14 @@ export default function Home() {
     setReferencePitch(data.pitch);
   };
 
+  const handleReplay = () => {
+    if (!audioURL) return;
+  
+    const audio = new Audio(audioURL);
+    audio.play();
+  };
+  
+
 
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -69,11 +77,12 @@ export default function Home() {
     user: point.frequency,
     reference: referencePitch[index]?.frequency ?? 0,  // handle mismatch
   }));
+  
 
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen w-screen text-[50px]">
-      <h1>mǎ1 馬</h1>
+      <h1>mǎ 馬</h1>
       <div className="grid grid-cols-2 grid-rows-2 gap-4 w-full px-8 h-[600px]">
 
         <div className='flex justify-center items-center w-full h-full'>
@@ -95,7 +104,21 @@ export default function Home() {
           className={`p-4 rounded-full text-white ${recording ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
           onClick={recording ? stopRecording : startRecording}>
           {recording ? <Square /> : <Mic />}
-        </button></div>
+        </button>
+        
+        {audioURL && (
+    <button
+      className="p-4 rounded-full bg-yellow-500 text-white hover:bg-yellow-600"
+      onClick={() => {
+        const audio = new Audio(audioURL);
+        audio.play();
+      }}
+    >
+      <RotateCcw />
+    </button>
+  )}
+        
+        </div>
 
         <div>{userPitch.length > 0 && (
           <LineChart width={400} height={300} data={mergedPitchData}>
