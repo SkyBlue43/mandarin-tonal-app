@@ -38,10 +38,11 @@ async def analyze_audio(file: UploadFile = File(...)):
     for i in range(pitch.get_number_of_frames()):
         time = pitch.get_time_from_frame_number(i + 1)
         freq = pitch.get_value_in_frame(i + 1)
-        if np.isnan(freq):
-            freq = 0
+        if np.isnan(freq) or freq <= 0:
+            semitone = 0  # or np.nan if you'd prefer to omit unvoiced parts
         else:
-            pitch_values.append({"time": time, "frequency": freq})
+            semitone = 12 * np.log2(freq)
+            pitch_values.append({"time": time, "frequency": semitone})
 
     os.remove(input_path)
     os.remove(output_path)

@@ -118,7 +118,7 @@ export default function Home() {
         <div>{referencePitch.length > 0 && (
           <LineChart width={400} height={300} data={referencePitch}>
             <XAxis dataKey="time" tick={{ fontSize: 14 }} />
-            <YAxis tick={{ fontSize: 14 }} />
+            <YAxis tick={{ fontSize: 14 }} domain={['dataMin - 5', 'dataMax + 5']} tickFormatter={(value) => value.toFixed(1)}/>
             <Line type="monotone" dataKey="frequency" stroke="#8884d8" dot={false} strokeWidth={5} />
           </LineChart>
         )}</div>
@@ -134,7 +134,7 @@ export default function Home() {
           <>
             <LineChart width={400} height={300} data={alignedGraphData}>
               <XAxis dataKey="time" tick={{ fontSize: 14 }} />
-              <YAxis tick={{ fontSize: 14 }} />
+              <YAxis tick={{ fontSize: 14 }} domain={['dataMin - 5', 'dataMax + 5']} tickFormatter={(value) => value.toFixed(1)}/>
               <Line type="monotone" dataKey="user" stroke="#82ca9d" dot={false} name="Your Pitch" strokeWidth={5} />
               <Line type="monotone" dataKey="reference" stroke="#8884d8" dot={false} name="Reference Pitch" strokeWidth={5} />
             </LineChart>
