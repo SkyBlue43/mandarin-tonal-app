@@ -1,6 +1,6 @@
 'use client'
 
-import OneWord from '@/app/components/oneWord';
+import Default from '@/app/components/default';
 import { useRouter } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import { Mic, Play, Square } from 'lucide-react';
@@ -138,23 +138,30 @@ export default function Main() {
 
       <div className="grid grid-cols-3 grid-rows-2 gap-4 w-full px-8 h-[600px]">
 
-        <OneWord
+        <div className='flex justify-center items-center w-full h-full'>
+          <button className="p-4 rounded-full bg-blue-500 text-white hover:bg-blue-600" onClick={handlePlay}>
+            <Play />
+          </button>
+          <button
+            className={`p-4 rounded-full text-white ${recording ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
+            onClick={recording ? stopRecording : startRecording}>
+            {recording ? <Square /> : <Mic />}
+          </button>
+        </div>
+
+        <Default
           referencePitch={referencePitch}
           alignedGraphData={alignedGraphData}
-          handlePlay={handlePlay}
-          startRecording={startRecording}
-          stopRecording={stopRecording}
-          recording={recording}
           countMatches={countMatches}
         />
+        
+        <div>
+          {/* This is where the audio recording(s) should go */}
+        </div>
 
-        <OneWord
+        <Default
           referencePitch={referencePitch}
           alignedGraphData={alignedGraphData}
-          handlePlay={handlePlay}
-          startRecording={startRecording}
-          stopRecording={stopRecording}
-          recording={recording}
           countMatches={countMatches}
         />
       </div>

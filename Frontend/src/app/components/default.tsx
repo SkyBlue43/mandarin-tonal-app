@@ -1,22 +1,13 @@
 import { LineChart, Line, XAxis, YAxis } from 'recharts';
-import { Play, Mic, Square } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 type Props = {
-  handlePlay: () => void;
-  startRecording: () => void;
-  stopRecording: () => void;
-  recording: boolean;
   referencePitch: { time: number; frequency: number }[];
   alignedGraphData: { time: number; user: number; reference: number }[];
   countMatches: (data: any[]) => number;
 };
 
-export default function OneWord({
-  handlePlay,
-  startRecording,
-  stopRecording,
-  recording,
+export default function Default({
   referencePitch,
   alignedGraphData,
   countMatches,
@@ -25,19 +16,8 @@ export default function OneWord({
 
   return (
     <>
-      <div className='flex justify-center items-center w-full h-full'>
-        <button className="p-4 rounded-full bg-blue-500 text-white hover:bg-blue-600" onClick={handlePlay}>
-          <Play />
-        </button>
-        <button
-          className={`p-4 rounded-full text-white ${recording ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
-          onClick={recording ? stopRecording : startRecording}>
-          {recording ? <Square /> : <Mic />}
-        </button>
-      </div>
-
       <div>{referencePitch.length > 0 && (
-        <LineChart width={400} height={300} data={referencePitch}>
+        <LineChart width={500} height={300} data={referencePitch}>
           <XAxis dataKey="time" tick={{ fontSize: 14 }} />
           <YAxis tick={{ fontSize: 14 }} domain={['dataMin - 5', 'dataMax + 5']} tickFormatter={(value) => value.toFixed(1)} />
           <Line type="monotone" dataKey="frequency" stroke="#8884d8" dot={false} strokeWidth={5} />
@@ -46,7 +26,7 @@ export default function OneWord({
 
       <div>{Array.isArray(alignedGraphData) && alignedGraphData.length > 0 && (
         <>
-          <LineChart width={400} height={300} data={alignedGraphData}>
+          <LineChart width={500} height={300} data={alignedGraphData}>
             <XAxis dataKey="time" tick={{ fontSize: 14 }} />
             <YAxis tick={{ fontSize: 14 }} domain={['dataMin - 5', 'dataMax + 5']} tickFormatter={(value) => value.toFixed(1)} />
             <Line type="monotone" dataKey="user" stroke="#82ca9d" dot={false} name="Your Pitch" strokeWidth={5} />
