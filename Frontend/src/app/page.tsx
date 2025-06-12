@@ -1,15 +1,17 @@
 'use client'
 
+import OneWord from '@/app/components/oneWord';
 import { useRouter } from 'next/navigation'
 import { useState, useRef } from 'react'
 import { Mic, Play, Square } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
-export default function Home() {
-  type PitchPoint = {
-    time: number;
-    frequency: number;
-  };
+type PitchPoint = {
+  time: number;
+  frequency: number;
+};
+
+export default function Main() {
   const router = useRouter();
   const [userPitch, setUserPitch] = useState<PitchPoint[]>([]);
   const [referencePitch, setReferencePitch] = useState<PitchPoint[]>([]);
@@ -40,7 +42,7 @@ export default function Home() {
     formData.append('data_user', JSON.stringify({
       frequency: userPitch.map(p => p.frequency),
       time: userPitch.map(p => p.time)
-    })); 
+    }));
     const result = await fetch('http://localhost:8000/dtw', {
       method: 'POST',
       body: formData
@@ -93,13 +95,13 @@ export default function Home() {
   function countMatches(aligned: any[], tolerance = 15): number {
     let totalPoints = aligned.length;
     let correctPoints = 0;
-  
+
     aligned.forEach(pair => {
       if (Math.abs(pair.user - pair.reference) < tolerance) {
         correctPoints += 1;
       }
     });
-  
+
     return totalPoints > 0 ? correctPoints / totalPoints : 0;
   }
 
@@ -107,48 +109,27 @@ export default function Home() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen w-screen text-[50px]">
       <h1>mǎ 馬 马</h1>
-      <div className="grid grid-cols-2 grid-rows-2 gap-4 w-full px-8 h-[600px]">
+      <div className="grid grid-cols-3 grid-rows-2 gap-4 w-full px-8 h-[600px]">
 
-        <div className='flex justify-center items-center w-full h-full'>
-          <button className="p-4 rounded-full bg-blue-500 text-white hover:bg-blue-600" onClick={handlePlay}>
-            <Play />
-          </button>
-        </div>
+        <OneWord
+          referencePitch={referencePitch}
+          alignedGraphData={alignedGraphData}
+          handlePlay={handlePlay}
+          startRecording={startRecording}
+          stopRecording={stopRecording}
+          recording={recording}
+          countMatches={countMatches}
+        />
 
-        <div>{referencePitch.length > 0 && (
-          <LineChart width={400} height={300} data={referencePitch}>
-            <XAxis dataKey="time" tick={{ fontSize: 14 }} />
-            <YAxis tick={{ fontSize: 14 }} domain={['dataMin - 5', 'dataMax + 5']} tickFormatter={(value) => value.toFixed(1)}/>
-            <Line type="monotone" dataKey="frequency" stroke="#8884d8" dot={false} strokeWidth={5} />
-          </LineChart>
-        )}</div>
-
-        <div className='flex justify-center items-center w-full h-full'>
-          <button
-            className={`p-4 rounded-full text-white ${recording ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
-            onClick={recording ? stopRecording : startRecording}>
-            {recording ? <Square /> : <Mic />}
-          </button></div>
-
-        <div>{Array.isArray(alignedGraphData) && alignedGraphData.length > 0 && (
-          <>
-            <LineChart width={400} height={300} data={alignedGraphData}>
-              <XAxis dataKey="time" tick={{ fontSize: 14 }} />
-              <YAxis tick={{ fontSize: 14 }} domain={['dataMin - 5', 'dataMax + 5']} tickFormatter={(value) => value.toFixed(1)}/>
-              <Line type="monotone" dataKey="user" stroke="#82ca9d" dot={false} name="Your Pitch" strokeWidth={5} />
-              <Line type="monotone" dataKey="reference" stroke="#8884d8" dot={false} name="Reference Pitch" strokeWidth={5} />
-            </LineChart>
-            <p className="text-lg mt-2 text-center text-white">
-              You were {(countMatches(alignedGraphData) * 100).toFixed(1)}% accurate!
-            </p>
-            <div>
-              {(countMatches(alignedGraphData) * 100) > 90 && (
-                <button className='bg-green-500 p-4 text-lg text-center rounded-3xl' onClick={() => router.push('/nextPage')}>
-                  Success! Next?
-                </button>
-              )}</div>
-          </>
-        )}</div>
+        <OneWord
+          referencePitch={referencePitch}
+          alignedGraphData={alignedGraphData}
+          handlePlay={handlePlay}
+          startRecording={startRecording}
+          stopRecording={stopRecording}
+          recording={recording}
+          countMatches={countMatches}
+        />
       </div>
     </main>
   );
