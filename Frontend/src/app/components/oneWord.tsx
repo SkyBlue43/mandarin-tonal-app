@@ -55,13 +55,6 @@ export default function OneWord({
           <p className="text-lg mt-2 text-center text-white">
             You were {(countMatches(alignedGraphData) * 100).toFixed(1)}% accurate!
           </p>
-          <div>
-            {(countMatches(alignedGraphData) * 100) > 90 && (
-              <button className='bg-green-500 p-4 text-lg text-center rounded-3xl' onClick={() => router.push('/nextPage')}>
-                Success! Next?
-              </button>
-            )}
-          </div>
         </>
       )}</div>
     </>

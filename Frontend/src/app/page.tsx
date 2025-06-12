@@ -2,7 +2,7 @@
 
 import OneWord from '@/app/components/oneWord';
 import { useRouter } from 'next/navigation'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Mic, Play, Square } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
@@ -12,6 +12,12 @@ type PitchPoint = {
 };
 
 export default function Main() {
+  const [chosenAudio, setChosenAudio] = useState('')
+  const [chosenPhrase, setChosenPhrase] = useState('')
+  const [audioChoice, setAudioChoice] = useState(0);
+  const [testChoice, setTestChoice] = useState(0);
+
+
   const router = useRouter();
   const [userPitch, setUserPitch] = useState<PitchPoint[]>([]);
   const [referencePitch, setReferencePitch] = useState<PitchPoint[]>([]);
@@ -20,6 +26,17 @@ export default function Main() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
   const [alignedGraphData, setAlignedGraphData] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (audioChoice === 0) {
+      setChosenAudio('chinese_output.mp3');
+      setChosenPhrase('mǎ 馬 马');
+    } else if (audioChoice === 1) {
+      setChosenAudio('chinese_phrase.mp3');
+      setChosenPhrase('你好！你今天怎么样？');
+    }
+  }, [audioChoice]);
+
 
   const analyzeAudio = async (audio_blob: Blob, audio_location: string) => {
     const formData = new FormData();
@@ -55,11 +72,11 @@ export default function Main() {
 
 
   const handlePlay = async () => {
-    const audio = new Audio('/audio/chinese_output.mp3');
+    const audio = new Audio(`/audio/${chosenAudio}`);
     audio.play();
-    const response = await fetch('/audio/chinese_output.mp3');
+    const response = await fetch(`/audio/${chosenAudio}`);
     const blob = await response.blob();
-    const data = await analyzeAudio(blob, 'chinese_output.mp3');
+    const data = await analyzeAudio(blob, chosenAudio);
     //const normalizedUserPitch = normalizePitch(data.pitch);
     setReferencePitch(data.pitch);
   };
@@ -101,14 +118,24 @@ export default function Main() {
         correctPoints += 1;
       }
     });
-
     return totalPoints > 0 ? correctPoints / totalPoints : 0;
   }
 
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen w-screen text-[50px]">
-      <h1>mǎ 馬 马</h1>
+      <header className='flex flex-cols text-white text-[22px] font-bold gap-3'>
+        <button className='p-3 rounded-2xl bg-yellow-500 hover:bg-yellow-600 w-30' onClick={() => setAudioChoice(0)}>
+          Character
+        </button>
+
+        <button className='p-3 rounded-2xl bg-yellow-500 hover:bg-yellow-600 w-30' onClick={() => setAudioChoice(1)}>
+          Phrase
+        </button>
+      </header>
+
+      <h1>{chosenPhrase}</h1>
+
       <div className="grid grid-cols-3 grid-rows-2 gap-4 w-full px-8 h-[600px]">
 
         <OneWord
