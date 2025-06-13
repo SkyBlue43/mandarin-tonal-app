@@ -136,6 +136,24 @@ export default function Main() {
           onClick={() => setAudioChoice(1)}>
           Phrase
         </button>
+
+        <button 
+          className={`p-3 rounded-2xl ${testChoice != 1 ? 'bg-pink-500 hover:bg-pink-600 w-30' : 'bg-white border border-2 border-pink-500 text-pink-500'}`} 
+          onClick={() => setTestChoice(1)}>
+          DTW
+        </button>
+
+        <button 
+          className={`p-3 rounded-2xl ${testChoice != 0 ? 'bg-pink-500 hover:bg-pink-600 w-30' : 'bg-white border border-2 border-pink-500 text-pink-500'}`} 
+          onClick={() => setTestChoice(0)}>
+          MFA
+        </button>
+
+        <button 
+          className={`p-3 rounded-2xl ${testChoice != 2 ? 'bg-pink-500 hover:bg-pink-600 w-30' : 'bg-white border border-2 border-pink-500 text-pink-500'}`} 
+          onClick={() => setTestChoice(2)}>
+          Voiceless
+        </button>
       </header>
 
       <h1>{chosenPhrase}</h1>
