@@ -1,6 +1,9 @@
 'use client'
 
 import Default from '@/app/components/default';
+import Time from '@/app/components/time';
+import MFA from '@/app/components/mfa';
+import Voiceless from '@/app/components/voiceless';
 import { useRouter } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import { Mic, Play, Square } from 'lucide-react';
@@ -125,32 +128,32 @@ export default function Main() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen w-screen text-[50px]">
       <header className='flex flex-cols text-white text-[22px] font-bold gap-3'>
-        <button 
-          className={`p-3 rounded-2xl ${audioChoice === 1 ? 'bg-yellow-500 hover:bg-yellow-600 w-30' : 'bg-white border border-2 border-yellow-500 text-yellow-500'}`} 
+        <button
+          className={`p-3 rounded-2xl ${audioChoice === 1 ? 'bg-yellow-500 hover:bg-yellow-600 w-30' : 'bg-white border border-2 border-yellow-500 text-yellow-500'}`}
           onClick={() => setAudioChoice(0)}>
           Character
         </button>
 
-        <button 
-          className={`p-3 rounded-2xl ${audioChoice === 0 ? 'bg-yellow-500 hover:bg-yellow-600 w-30' : 'bg-white border border-2 border-yellow-500 text-yellow-500'}`} 
+        <button
+          className={`p-3 rounded-2xl ${audioChoice === 0 ? 'bg-yellow-500 hover:bg-yellow-600 w-30' : 'bg-white border border-2 border-yellow-500 text-yellow-500'}`}
           onClick={() => setAudioChoice(1)}>
           Phrase
         </button>
 
-        <button 
-          className={`p-3 rounded-2xl ${testChoice != 1 ? 'bg-pink-500 hover:bg-pink-600 w-30' : 'bg-white border border-2 border-pink-500 text-pink-500'}`} 
+        <button
+          className={`p-3 rounded-2xl ${testChoice != 1 ? 'bg-pink-500 hover:bg-pink-600 w-30' : 'bg-white border border-2 border-pink-500 text-pink-500'}`}
           onClick={() => setTestChoice(1)}>
           DTW
         </button>
 
-        <button 
-          className={`p-3 rounded-2xl ${testChoice != 0 ? 'bg-pink-500 hover:bg-pink-600 w-30' : 'bg-white border border-2 border-pink-500 text-pink-500'}`} 
+        <button
+          className={`p-3 rounded-2xl ${testChoice != 0 ? 'bg-pink-500 hover:bg-pink-600 w-30' : 'bg-white border border-2 border-pink-500 text-pink-500'}`}
           onClick={() => setTestChoice(0)}>
           MFA
         </button>
 
-        <button 
-          className={`p-3 rounded-2xl ${testChoice != 2 ? 'bg-pink-500 hover:bg-pink-600 w-30' : 'bg-white border border-2 border-pink-500 text-pink-500'}`} 
+        <button
+          className={`p-3 rounded-2xl ${testChoice != 2 ? 'bg-pink-500 hover:bg-pink-600 w-30' : 'bg-white border border-2 border-pink-500 text-pink-500'}`}
           onClick={() => setTestChoice(2)}>
           Voiceless
         </button>
@@ -181,11 +184,31 @@ export default function Main() {
           {/* This is where the audio recording(s) should go */}
         </div>
 
-        <Default
-          referencePitch={referencePitch}
-          alignedGraphData={alignedGraphData}
-          countMatches={countMatches}
-        />
+        <div>
+          {testChoice === 0 && (
+            <Time
+              referencePitch={referencePitch}
+              alignedGraphData={alignedGraphData}
+              countMatches={countMatches}
+            />
+          )}
+
+          {testChoice === 1 && (
+            <MFA
+              referencePitch={referencePitch}
+              alignedGraphData={alignedGraphData}
+              countMatches={countMatches}
+            />
+          )}
+
+          {testChoice === 2 && (
+            <Voiceless
+              referencePitch={referencePitch}
+              alignedGraphData={alignedGraphData}
+              countMatches={countMatches}
+            />
+          )}
+        </div>
       </div>
     </main>
   );
