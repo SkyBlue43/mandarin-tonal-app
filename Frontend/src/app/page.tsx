@@ -125,11 +125,15 @@ export default function Main() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen w-screen text-[50px]">
       <header className='flex flex-cols text-white text-[22px] font-bold gap-3'>
-        <button className='p-3 rounded-2xl bg-yellow-500 hover:bg-yellow-600 w-30' onClick={() => setAudioChoice(0)}>
+        <button 
+          className={`p-3 rounded-2xl ${audioChoice === 1 ? 'bg-yellow-500 hover:bg-yellow-600 w-30' : 'bg-white border border-2 border-yellow-500 text-yellow-500'}`} 
+          onClick={() => setAudioChoice(0)}>
           Character
         </button>
 
-        <button className='p-3 rounded-2xl bg-yellow-500 hover:bg-yellow-600 w-30' onClick={() => setAudioChoice(1)}>
+        <button 
+          className={`p-3 rounded-2xl ${audioChoice === 0 ? 'bg-yellow-500 hover:bg-yellow-600 w-30' : 'bg-white border border-2 border-yellow-500 text-yellow-500'}`} 
+          onClick={() => setAudioChoice(1)}>
           Phrase
         </button>
       </header>
@@ -154,7 +158,7 @@ export default function Main() {
           alignedGraphData={alignedGraphData}
           countMatches={countMatches}
         />
-        
+
         <div>
           {/* This is where the audio recording(s) should go */}
         </div>
