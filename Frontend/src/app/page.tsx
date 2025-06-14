@@ -7,12 +7,7 @@ import Voiceless from '@/app/components/voiceless';
 import { useRouter } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import { Mic, Play, Square } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
-type PitchPoint = {
-  time: number;
-  frequency: number;
-};
 
 export default function Main() {
   const [chosenAudio, setChosenAudio] = useState('')
@@ -22,13 +17,14 @@ export default function Main() {
 
 
   const router = useRouter();
-  const [userPitch, setUserPitch] = useState<PitchPoint[]>([]);
-  const [referencePitch, setReferencePitch] = useState<PitchPoint[]>([]);
   const [recording, setRecording] = useState(false);
   const [audioURL, setAudioURL] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
-  const [alignedGraphData, setAlignedGraphData] = useState<any[]>([]);
+
+  //new ones
+  const [referenceBlob, setReferenceBlob] = useState<Blob | null>(null);
+  const [userBlob, setUserBlob] = useState<Blob | null>(null);
 
   useEffect(() => {
     if (audioChoice === 0) {
@@ -41,47 +37,12 @@ export default function Main() {
   }, [audioChoice]);
 
 
-  const analyzeAudio = async (audio_blob: Blob, audio_location: string) => {
-    const formData = new FormData();
-    formData.append('file', audio_blob, audio_location);
-    const result = await fetch('http://localhost:8000/analyze-audio', {
-      method: 'POST',
-      body: formData,
-    });
-    const data = await result.json();
-    console.log('Pitch data:', data);
-    return data
-  };
-
-  const DTW = async (userPitch: PitchPoint[], referencePitch: PitchPoint[]) => {
-    const formData = new FormData();
-    formData.append('data_reference', JSON.stringify({
-      frequency: referencePitch.map(p => p.frequency),
-      time: referencePitch.map(p => p.time)
-    }));
-    formData.append('data_user', JSON.stringify({
-      frequency: userPitch.map(p => p.frequency),
-      time: userPitch.map(p => p.time)
-    }));
-    const result = await fetch('http://localhost:8000/dtw', {
-      method: 'POST',
-      body: formData
-    });
-    const data = await result.json();
-    console.log("DTW result:", data);
-    setAlignedGraphData(data.aligned);
-  };
-
-
-
   const handlePlay = async () => {
     const audio = new Audio(`/audio/${chosenAudio}`);
     audio.play();
     const response = await fetch(`/audio/${chosenAudio}`);
     const blob = await response.blob();
-    const data = await analyzeAudio(blob, chosenAudio);
-    //const normalizedUserPitch = normalizePitch(data.pitch);
-    setReferencePitch(data.pitch);
+    setReferenceBlob(blob);
   };
 
 
@@ -96,10 +57,7 @@ export default function Main() {
       const audioBlob = new Blob(audioChunks.current, { type: 'audio/wav' });
       const url = URL.createObjectURL(audioBlob);
       setAudioURL(url);
-      const data = await analyzeAudio(audioBlob, 'recorded_audio.wav');
-      //const normalizedUserPitch = normalizePitch(data.pitch);
-      setUserPitch(data.pitch);
-      DTW(data.pitch, referencePitch);
+      setUserBlob(audioBlob);
     };
     audioChunks.current = [];
     mediaRecorder.start();
@@ -110,19 +68,6 @@ export default function Main() {
     mediaRecorderRef.current?.stop();
     setRecording(false);
   };
-
-
-  function countMatches(aligned: any[], tolerance = 15): number {
-    let totalPoints = aligned.length;
-    let correctPoints = 0;
-
-    aligned.forEach(pair => {
-      if (Math.abs(pair.user - pair.reference) < tolerance) {
-        correctPoints += 1;
-      }
-    });
-    return totalPoints > 0 ? correctPoints / totalPoints : 0;
-  }
 
 
   return (
@@ -175,9 +120,9 @@ export default function Main() {
         </div>
 
         <Default
-          referencePitch={referencePitch}
-          alignedGraphData={alignedGraphData}
-          countMatches={countMatches}
+          userBlob={userBlob}
+          referenceBlob={referenceBlob}
+          chosenAudio={chosenAudio}
         />
 
         <div>
@@ -187,25 +132,25 @@ export default function Main() {
         <div>
           {testChoice === 0 && (
             <Time
-              referencePitch={referencePitch}
-              alignedGraphData={alignedGraphData}
-              countMatches={countMatches}
+              userBlob={userBlob}
+              referenceBlob={referenceBlob}
+              chosenAudio={chosenAudio}
             />
           )}
 
           {testChoice === 1 && (
             <MFA
-              referencePitch={referencePitch}
-              alignedGraphData={alignedGraphData}
-              countMatches={countMatches}
+              userBlob={userBlob}
+              referenceBlob={referenceBlob}
+              chosenAudio={chosenAudio}
             />
           )}
 
           {testChoice === 2 && (
             <Voiceless
-              referencePitch={referencePitch}
-              alignedGraphData={alignedGraphData}
-              countMatches={countMatches}
+              userBlob={userBlob}
+              referenceBlob={referenceBlob}
+              chosenAudio={chosenAudio}
             />
           )}
         </div>
