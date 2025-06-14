@@ -3,9 +3,9 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react'
 
 type Props = {
-  userBlob : Blob | null;
-  referenceBlob : Blob | null;
-  chosenAudio : string;
+  userBlob: Blob | null;
+  referenceBlob: Blob | null;
+  chosenAudio: string;
 };
 
 type PitchPoint = {
@@ -24,24 +24,35 @@ export default function Voiceless({
   const [alignedGraphData, setAlignedGraphData] = useState<any[]>([]);
 
   useEffect(() => {
-    const analyze = async () => {
-      const referenceData = await analyzeAudio(referenceBlob, chosenAudio);
-      const userData = await analyzeAudio(userBlob, "recording" + chosenAudio);
-      if (referenceData && userData) {
-        setReferencePitch(referenceData.pitch);
-        setUserPitch(userData.pitch);
-        DTW(userData.pitch, referenceData.pitch);
+    const analyzeReference = async () => {
+      const data = await analyzeAudio(referenceBlob, chosenAudio);
+      if (data) setReferencePitch(data.pitch);
+    };
+
+    if (referenceBlob) {
+      analyzeReference();
+    }
+  }, [referenceBlob, chosenAudio]);
+
+  useEffect(() => {
+    const analyzeUser = async () => {
+      const data = await analyzeAudio(userBlob, "recording" + chosenAudio);
+      if (data) {
+        setUserPitch(data.pitch);
+        if (referencePitch.length > 0) {
+          DTW(data.pitch, referencePitch);
+        }
       }
     };
-  
-    if (referenceBlob && userBlob) {
-      analyze();
+
+    if (userBlob) {
+      analyzeUser();
     }
-  }, [referenceBlob, userBlob, chosenAudio]);
-  
+  }, [userBlob, chosenAudio]);
+
 
   const analyzeAudio = async (audio_blob: Blob | null, audio_location: string) => {
-    if (audio_blob === null){ return null }
+    if (audio_blob === null) { return null }
     const formData = new FormData();
     formData.append('file', audio_blob, audio_location);
     const result = await fetch('http://localhost:8000/analyze-audio', {
