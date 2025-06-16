@@ -119,7 +119,7 @@ export default function Main() {
           </button>
         </div>
 
-        <div className='col-span-2 col-start-2 row-start-1 row-end-2 flex gap-4 justify-center items-center'><Default
+        <div className='col-span-2 col-start-2 row-start-1 row-end-2 flex gap-4 justify-betwwen items-start'><Default
           userBlob={userBlob}
           referenceBlob={referenceBlob}
           chosenAudio={chosenAudio}
@@ -130,7 +130,7 @@ export default function Main() {
           {/* This is where the audio recording(s) should go */}
         </div>
 
-        <div className="col-span-2 col-start-2 row-start-2 row-end-3 flex gap-4 justify-center items-center">
+        <div className="col-span-2 col-start-2 row-start-2 row-end-3 flex gap-4 justify-between items-start">
           {testChoice === 0 && (
             <Time
               userBlob={userBlob}
