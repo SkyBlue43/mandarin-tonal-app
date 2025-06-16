@@ -71,7 +71,7 @@ export default function Main() {
 
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen w-screen text-[50px]">
+    <main className="flex flex-col items-center justify-start p-6 min-h-screen w-screen text-[50px]">
       <header className='flex flex-cols text-white text-[22px] font-bold gap-3'>
         <button
           className={`p-3 rounded-2xl ${audioChoice === 1 ? 'bg-yellow-500 hover:bg-yellow-600 w-30' : 'bg-white border border-2 border-yellow-500 text-yellow-500'}`}
@@ -106,7 +106,7 @@ export default function Main() {
 
       <h1>{chosenPhrase}</h1>
 
-      <div className="grid grid-cols-3 grid-rows-2 gap-4 w-full px-8 h-[600px]">
+      <div className="grid grid-cols-3 grid-rows-2 gap-4 w-full px-8 h-[800px]">
 
         <div className='flex justify-center items-center w-full h-full'>
           <button className="p-4 rounded-full bg-blue-500 text-white hover:bg-blue-600" onClick={handlePlay}>
@@ -119,17 +119,18 @@ export default function Main() {
           </button>
         </div>
 
-        <Default
+        <div className='col-span-2 col-start-2 row-start-1 row-end-2 flex gap-4 justify-center items-center'><Default
           userBlob={userBlob}
           referenceBlob={referenceBlob}
           chosenAudio={chosenAudio}
-        />
+        /></div>
+        
 
         <div>
           {/* This is where the audio recording(s) should go */}
         </div>
 
-        <div>
+        <div className="col-span-2 col-start-2 row-start-2 row-end-3 flex gap-4 justify-center items-center">
           {testChoice === 0 && (
             <Time
               userBlob={userBlob}
