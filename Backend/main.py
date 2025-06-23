@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Form, UploadFile, File
+from fastapi import FastAPI, Form, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydub import AudioSegment
 import parselmouth
@@ -103,6 +103,128 @@ async def dtw(
         for pt in aligned_points:
             if pt["user"] is not None:
                 pt["user"] += shift
+
+    return {
+        "distance": distance,
+        "aligned": aligned_points
+    }
+
+
+
+
+
+
+
+
+# Using this for voiceless testing
+
+
+@app.post("/analyze-audio-voiceless/")
+async def analyze_audio(file: UploadFile = File(...)):
+    input_path = "temp_input"
+    output_path = "temp.wav"
+
+    with open(input_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    audio = AudioSegment.from_file(input_path)
+    audio.export(output_path, format="wav")
+
+    sound = parselmouth.Sound(output_path)
+    pitch = sound.to_pitch()
+
+    pitch_values = []
+    for i in range(pitch.get_number_of_frames()):
+        time = pitch.get_time_from_frame_number(i + 1)
+        freq = pitch.get_value_in_frame(i + 1)
+        if not np.isnan(freq) and freq > 0:
+            semitone = 12 * np.log2(freq)
+            pitch_values.append({"time": time, "frequency": semitone})
+        else:
+            pitch_values.append({"time": time, "frequency": None})  # or null in JSON
+
+
+    os.remove(input_path)
+    os.remove(output_path)
+
+    return {"pitch": pitch_values}
+
+
+# REWRITE THIS CODE!!!
+def safe_mean(arr, default=0.0):
+    """Mean of valid numbers only."""
+    valid = [x for x in arr if x is not None and not np.isnan(x) and not np.isinf(x)]
+    return np.mean(valid) if valid else default
+
+# ---- Endpoint ----
+
+@app.post("/dtw-voiceless/")
+async def dtw(
+    data_reference: str = Form(...),
+    data_user: str = Form(...)
+):
+    reference_data = json.loads(data_reference)
+    user_data = json.loads(data_user)
+
+    # Normalize and keep indices
+    def normalize_with_index(pitch):
+        valid = [(i, p) for i, p in enumerate(pitch) if p is not None and not np.isnan(p) and not np.isinf(p)]
+        if not valid:
+            return [], {}
+        min_p = min(p for _, p in valid)
+        max_p = max(p for _, p in valid)
+        if min_p == max_p:
+            normed = [(i, 0.5) for i, _ in valid]
+        else:
+            normed = [(i, (p - min_p) / (max_p - min_p)) for i, p in valid]
+        return [v for _, v in normed], {idx: v for idx, v in normed}
+
+    norm_ref, norm_ref_map = normalize_with_index(reference_data["frequency"])
+    norm_user, norm_user_map = normalize_with_index(user_data["frequency"])
+
+    ref_tuples = [(v,) for v in norm_ref]
+    user_tuples = [(v,) for v in norm_user]
+
+    if not ref_tuples or not user_tuples:
+        raise HTTPException(status_code=400, detail="Pitch data too sparse after cleaning.")
+
+    # DTW alignment using original indices
+    distance, path = fastdtw(ref_tuples, user_tuples, dist=euclidean)
+
+    # Reverse the index map to actual positions
+    ref_keys = list(norm_ref_map.keys())
+    user_keys = list(norm_user_map.keys())
+
+    user_aligned = {}
+    for i, j in path:
+        ref_idx = ref_keys[i]
+        user_idx = user_keys[j]
+        val = user_data["frequency"][user_idx]
+        if ref_idx not in user_aligned:
+            user_aligned[ref_idx] = []
+        if val is not None and not np.isnan(val) and not np.isinf(val):
+            user_aligned[ref_idx].append(val)
+
+    # Build aligned points
+    aligned_points = []
+    for i, ref_freq in enumerate(reference_data["frequency"]):
+        time = reference_data["time"][i]
+        user_vals = user_aligned.get(i, [])
+        user_freq = np.mean(user_vals) if user_vals else None
+        aligned_points.append({
+            "time": time,
+            "reference": ref_freq,
+            "user": user_freq
+        })
+
+    # Vertical shift
+    ref_mean = safe_mean(reference_data["frequency"])
+    user_mean = safe_mean([pt["user"] for pt in aligned_points])
+    shift = ref_mean - user_mean
+
+    for pt in aligned_points:
+        if pt["user"] is not None:
+            pt["user"] += shift
 
     return {
         "distance": distance,
