@@ -77,6 +77,19 @@ export default function MFA({
     return totalPoints > 0 ? correctPoints / totalPoints : 0;
   }
 
+  const getDataMFA = async (audio_blob: Blob, audio_location: string, audio_text: string) => {
+    const formData = new FormData();
+    formData.append('file', audio_blob, audio_location);
+    formData.append('transcript', audio_text);
+    const result = await fetch('http://localhost:8000/mfa', {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await result.json();
+    console.log("MFA data:", data);
+    return data
+  };
+
   const DTW = async (userPitch: PitchPoint[], referencePitch: PitchPoint[]) => {
     const formData = new FormData();
     formData.append('data_reference', JSON.stringify({
