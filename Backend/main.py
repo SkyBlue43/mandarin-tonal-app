@@ -2,12 +2,12 @@ from fastapi import FastAPI, Form, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydub import AudioSegment
 import parselmouth
-import shutil
-import os
 import numpy as np
 from fastdtw import fastdtw
 from scipy.spatial.distance import euclidean
 import json
+import shutil, os, subprocess
+from textgrid import TextGrid
 
 app = FastAPI()
 
