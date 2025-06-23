@@ -55,7 +55,7 @@ export default function Voiceless({
     if (audio_blob === null) { return null }
     const formData = new FormData();
     formData.append('file', audio_blob, audio_location);
-    const result = await fetch('http://localhost:8000/analyze-audio', {
+    const result = await fetch('http://localhost:8000/analyze-audio-voiceless', { //Changed this to voiceless
       method: 'POST',
       body: formData,
     });
@@ -87,7 +87,7 @@ export default function Voiceless({
       frequency: userPitch.map(p => p.frequency),
       time: userPitch.map(p => p.time)
     }));
-    const result = await fetch('http://localhost:8000/dtw', {
+    const result = await fetch('http://localhost:8000/dtw-voiceless', { //Changed this to voiceless too
       method: 'POST',
       body: formData
     });
