@@ -1,11 +1,13 @@
 import { LineChart, Line, XAxis, YAxis } from 'recharts';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react'
+import { getMainColorOfGraphicItem } from 'recharts/types/util/ChartUtils';
 
 type Props = {
   userBlob: Blob | null;
   referenceBlob: Blob | null;
   chosenAudio: string;
+  chosenPhrase: string;
 };
 
 type PitchPoint = {
@@ -17,11 +19,13 @@ export default function MFA({
   userBlob,
   referenceBlob,
   chosenAudio,
+  chosenPhrase,
 }: Props) {
   const router = useRouter();
   const [userPitch, setUserPitch] = useState<PitchPoint[]>([]);
   const [referencePitch, setReferencePitch] = useState<PitchPoint[]>([]);
   const [alignedGraphData, setAlignedGraphData] = useState<any[]>([]);
+  const [referenceMFA, setReferenceMFA] = useState(null);
 
   useEffect(() => {
     const analyzeReference = async () => {
@@ -35,20 +39,40 @@ export default function MFA({
   }, [referenceBlob, chosenAudio]);
 
   useEffect(() => {
-    const analyzeUser = async () => {
-      const data = await analyzeAudio(userBlob, "recording" + chosenAudio);
-      if (data) {
-        setUserPitch(data.pitch);
-        if (referencePitch.length > 0) {
-          DTW(data.pitch, referencePitch);
+    if (!userBlob) return;
+  
+    (async () => {
+      try {
+        const data = await analyzeAudio(userBlob, "recording" + chosenAudio);
+        if (data) {
+          setUserPitch(data.pitch);
+  
+          if (referencePitch.length > 0) {
+            await DTW(data.pitch, referencePitch);
+          }
         }
+  
+        // Fire MFA in background, don't block pitch
+        if (referenceMFA != null){
+        getDataMFA(referenceBlob, chosenAudio, chosenPhrase)
+          .then(dataMFA => {
+            if (dataMFA) {
+              console.log("MFA result:", dataMFA);
+              setReferenceMFA(dataMFA);
+            }
+          })
+          .catch(err => {
+            console.error("MFA fetch error:", err);
+          });
+        }
+  
+      } catch (error) {
+        console.error("Error during analysis:", error);
       }
-    };
-
-    if (userBlob) {
-      analyzeUser();
-    }
-  }, [userBlob, chosenAudio]);
+    })();
+  }, [userBlob, chosenAudio, chosenPhrase, referencePitch]);
+  
+  
 
 
   const analyzeAudio = async (audio_blob: Blob | null, audio_location: string) => {
@@ -60,7 +84,6 @@ export default function MFA({
       body: formData,
     });
     const data = await result.json();
-    console.log('Pitch data:', data);
     return data
   };
 
@@ -77,7 +100,8 @@ export default function MFA({
     return totalPoints > 0 ? correctPoints / totalPoints : 0;
   }
 
-  const getDataMFA = async (audio_blob: Blob, audio_location: string, audio_text: string) => {
+  const getDataMFA = async (audio_blob: Blob | null, audio_location: string, audio_text: string) => {
+    if (audio_blob === null) { return null }
     const formData = new FormData();
     formData.append('file', audio_blob, audio_location);
     formData.append('transcript', audio_text);
@@ -105,7 +129,6 @@ export default function MFA({
       body: formData
     });
     const data = await result.json();
-    console.log("DTW result:", data);
     setAlignedGraphData(data.aligned);
   };
 
@@ -128,6 +151,9 @@ export default function MFA({
             <Line type="monotone" dataKey="user" stroke="#82ca9d" dot={false} name="Your Pitch" strokeWidth={5} />
             <Line type="monotone" dataKey="reference" stroke="#8884d8" dot={false} name="Reference Pitch" strokeWidth={5} />
           </LineChart>
+          <p className='text-white'>
+            help me
+          </p>
           <p className="text-lg mt-2 text-center text-white">
             You were {(countMatches(alignedGraphData) * 100).toFixed(1)}% accurate!
           </p>

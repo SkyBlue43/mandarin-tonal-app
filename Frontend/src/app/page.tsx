@@ -86,14 +86,14 @@ export default function Main() {
         </button>
 
         <button
-          className={`p-3 rounded-2xl ${testChoice != 1 ? 'bg-pink-500 hover:bg-pink-600 w-30' : 'bg-white border border-2 border-pink-500 text-pink-500'}`}
-          onClick={() => setTestChoice(1)}>
+          className={`p-3 rounded-2xl ${testChoice != 0 ? 'bg-pink-500 hover:bg-pink-600 w-30' : 'bg-white border border-2 border-pink-500 text-pink-500'}`}
+          onClick={() => setTestChoice(0)}>
           DTW
         </button>
 
         <button
-          className={`p-3 rounded-2xl ${testChoice != 0 ? 'bg-pink-500 hover:bg-pink-600 w-30' : 'bg-white border border-2 border-pink-500 text-pink-500'}`}
-          onClick={() => setTestChoice(0)}>
+          className={`p-3 rounded-2xl ${testChoice != 1 ? 'bg-pink-500 hover:bg-pink-600 w-30' : 'bg-white border border-2 border-pink-500 text-pink-500'}`}
+          onClick={() => setTestChoice(1)}>
           MFA
         </button>
 
@@ -144,6 +144,7 @@ export default function Main() {
               userBlob={userBlob}
               referenceBlob={referenceBlob}
               chosenAudio={chosenAudio}
+              chosenPhrase={chosenPhrase}
             />
           )}
 
