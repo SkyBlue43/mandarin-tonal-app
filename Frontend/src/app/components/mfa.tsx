@@ -1,7 +1,6 @@
 import { LineChart, Line, XAxis, YAxis } from 'recharts';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react'
-import { getMainColorOfGraphicItem } from 'recharts/types/util/ChartUtils';
 
 type Props = {
   userBlob: Blob | null;
@@ -15,6 +14,19 @@ type PitchPoint = {
   frequency: number;
 };
 
+type MFAWord = {
+  start: number;
+  end: number;
+  text: string;
+};
+
+type MFAData = {
+  alignment: {
+    words: MFAWord[];
+    phones: any[];
+  };
+};
+
 export default function MFA({
   userBlob,
   referenceBlob,
@@ -25,7 +37,7 @@ export default function MFA({
   const [userPitch, setUserPitch] = useState<PitchPoint[]>([]);
   const [referencePitch, setReferencePitch] = useState<PitchPoint[]>([]);
   const [alignedGraphData, setAlignedGraphData] = useState<any[]>([]);
-  const [referenceMFA, setReferenceMFA] = useState(null);
+  const [referenceMFA, setReferenceMFA] = useState<MFAData | null>(null);
 
   useEffect(() => {
     const analyzeReference = async () => {
@@ -40,39 +52,39 @@ export default function MFA({
 
   useEffect(() => {
     if (!userBlob) return;
-  
+
     (async () => {
       try {
         const data = await analyzeAudio(userBlob, "recording" + chosenAudio);
         if (data) {
           setUserPitch(data.pitch);
-  
+
           if (referencePitch.length > 0) {
             await DTW(data.pitch, referencePitch);
           }
         }
-  
+
         // Fire MFA in background, don't block pitch
-        if (referenceMFA != null){
-        getDataMFA(referenceBlob, chosenAudio, chosenPhrase)
-          .then(dataMFA => {
-            if (dataMFA) {
-              console.log("MFA result:", dataMFA);
-              setReferenceMFA(dataMFA);
-            }
-          })
-          .catch(err => {
-            console.error("MFA fetch error:", err);
-          });
+        if (!referenceMFA || referenceMFA.alignment.words.length === 0) {
+          getDataMFA(referenceBlob, chosenAudio, chosenPhrase)
+            .then(dataMFA => {
+              if (dataMFA) {
+                console.log("MFA result:", dataMFA);
+                setReferenceMFA(dataMFA);
+              }
+            })
+            .catch(err => {
+              console.error("MFA fetch error:", err);
+            });
         }
-  
+
       } catch (error) {
         console.error("Error during analysis:", error);
       }
     })();
   }, [userBlob, chosenAudio, chosenPhrase, referencePitch]);
-  
-  
+
+
 
 
   const analyzeAudio = async (audio_blob: Blob | null, audio_location: string) => {
@@ -151,9 +163,24 @@ export default function MFA({
             <Line type="monotone" dataKey="user" stroke="#82ca9d" dot={false} name="Your Pitch" strokeWidth={5} />
             <Line type="monotone" dataKey="reference" stroke="#8884d8" dot={false} name="Reference Pitch" strokeWidth={5} />
           </LineChart>
-          <p className='text-white'>
-            help me
-          </p>
+
+          {referenceMFA && (
+            <div className="relative w-full h-6 mt-2">
+              {referenceMFA.alignment.words.map(word => (
+                <span
+                  key={word.start}
+                  className="absolute text-center whitespace-nowrap text-lg text-white"
+                  style={{
+                    left: `${((((word.start + word.end) / 2)) / (referencePitch.at(-1)?.time || 1)) * 100}%`,
+                  }}
+                >
+                  {word.text}
+                </span>
+              ))}
+            </div>
+          )}
+
+
           <p className="text-lg mt-2 text-center text-white">
             You were {(countMatches(alignedGraphData) * 100).toFixed(1)}% accurate!
           </p>
