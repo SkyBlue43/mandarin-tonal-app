@@ -119,7 +119,7 @@ export default function Main() {
           </button>
         </div>
 
-        <div className='col-span-2 col-start-2 row-start-1 row-end-2 flex gap-4 justify-betwwen items-start'><Default
+        <div className='col-span-2 col-start-2 row-start-1 row-end-2 flex gap-4 justify-between items-start'><Default
           userBlob={userBlob}
           referenceBlob={referenceBlob}
           chosenAudio={chosenAudio}
