@@ -86,14 +86,14 @@ export default function Main() {
         </button>
 
         <button
-          className={`p-3 rounded-2xl ${testChoice != 1 ? 'bg-pink-500 hover:bg-pink-600 w-30' : 'bg-white border border-2 border-pink-500 text-pink-500'}`}
-          onClick={() => setTestChoice(1)}>
+          className={`p-3 rounded-2xl ${testChoice != 0 ? 'bg-pink-500 hover:bg-pink-600 w-30' : 'bg-white border border-2 border-pink-500 text-pink-500'}`}
+          onClick={() => setTestChoice(0)}>
           DTW
         </button>
 
         <button
-          className={`p-3 rounded-2xl ${testChoice != 0 ? 'bg-pink-500 hover:bg-pink-600 w-30' : 'bg-white border border-2 border-pink-500 text-pink-500'}`}
-          onClick={() => setTestChoice(0)}>
+          className={`p-3 rounded-2xl ${testChoice != 1 ? 'bg-pink-500 hover:bg-pink-600 w-30' : 'bg-white border border-2 border-pink-500 text-pink-500'}`}
+          onClick={() => setTestChoice(1)}>
           MFA
         </button>
 
@@ -119,7 +119,7 @@ export default function Main() {
           </button>
         </div>
 
-        <div className='col-span-2 col-start-2 row-start-1 row-end-2 flex gap-4 justify-betwwen items-start'><Default
+        <div className='col-span-2 col-start-2 row-start-1 row-end-2 flex gap-4 justify-between items-start'><Default
           userBlob={userBlob}
           referenceBlob={referenceBlob}
           chosenAudio={chosenAudio}
@@ -144,6 +144,7 @@ export default function Main() {
               userBlob={userBlob}
               referenceBlob={referenceBlob}
               chosenAudio={chosenAudio}
+              chosenPhrase={chosenPhrase}
             />
           )}
 

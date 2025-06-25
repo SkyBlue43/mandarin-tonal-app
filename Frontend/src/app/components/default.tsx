@@ -60,7 +60,6 @@ export default function Default({
       body: formData,
     });
     const data = await result.json();
-    console.log('Pitch data:', data);
     return data
   };
 
@@ -92,7 +91,6 @@ export default function Default({
       body: formData
     });
     const data = await result.json();
-    console.log("DTW result:", data);
     setAlignedGraphData(data.aligned);
   };
 
