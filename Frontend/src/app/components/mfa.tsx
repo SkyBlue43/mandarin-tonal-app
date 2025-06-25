@@ -149,29 +149,30 @@ export default function MFA({
     <>
       <div>{referencePitch.length > 0 && (
         <>
-        <LineChart width={500} height={300} data={referencePitch}>
-          <XAxis dataKey="time" tick={{ fontSize: 14 }} />
-          <YAxis tick={{ fontSize: 14 }} domain={['dataMin - 5', 'dataMax + 5']} tickFormatter={(value) => value.toFixed(1)} />
-          <Line type="monotone" dataKey="frequency" stroke="#8884d8" dot={false} strokeWidth={5} />
-        </LineChart>
-        
-        {referenceMFA && (
-          <div className="relative w-full h-6 mt-2">
-            {referenceMFA.alignment.words.map(word => (
-              <span
-                key={word.start}
-                className="absolute text-center whitespace-nowrap text-lg text-white"
-                style={{
-                  left: `${((((word.start + word.end) / 2)) / (referencePitch.at(-1)?.time || 1)) * 100}%`,
-                }}
-              >
-                {word.text}
-              </span>
-            ))}
-          </div>
-        )}
+          <LineChart width={500} height={300} data={referencePitch}>
+            <XAxis dataKey="time" tick={{ fontSize: 14 }} />
+            <YAxis tick={{ fontSize: 14 }} domain={['dataMin - 5', 'dataMax + 5']} tickFormatter={(value) => value.toFixed(1)} />
+            <Line type="monotone" dataKey="frequency" stroke="#8884d8" dot={false} strokeWidth={5} />
+          </LineChart>
+
+          {referenceMFA && (
+            <div className="relative mt-2 ml-14" style={{ width: '400px', height: '24px' }}>
+              {referenceMFA.alignment.words.map(word => (
+                <span
+                  key={word.start}
+                  className="absolute text-center whitespace-nowrap text-lg text-white"
+                  style={{
+                    left: `${((((word.start + word.end) / 2) - 0.1) / (referencePitch.at(-1)?.time || 1)) * 100}%`,
+                  }}
+                >
+                  {word.text}
+                </span>
+              ))}
+            </div>
+
+          )}
         </>
-        
+
 
       )}</div>
 
@@ -185,13 +186,13 @@ export default function MFA({
           </LineChart>
 
           {referenceMFA && (
-            <div className="relative w-full h-6 mt-2">
+            <div className="relative mt-2 ml-14" style={{ width: '400px', height: '24px' }}>
               {referenceMFA.alignment.words.map(word => (
                 <span
                   key={word.start}
                   className="absolute text-center whitespace-nowrap text-lg text-white"
                   style={{
-                    left: `${((((word.start + word.end) / 2)) / (referencePitch.at(-1)?.time || 1)) * 100}%`,
+                    left: `${((((word.start + word.end) / 2) - 0.1) / (referencePitch.at(-1)?.time || 1)) * 100}%`,
                   }}
                 >
                   {word.text}
