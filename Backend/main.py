@@ -8,6 +8,8 @@ from scipy.spatial.distance import euclidean
 import json
 import shutil, os, subprocess
 from textgrid import TextGrid
+import whisper
+from faster_whisper import WhisperModel
 
 app = FastAPI()
 
@@ -297,3 +299,42 @@ async def mfa(
                 })
 
     return {"alignment": results}
+
+
+
+# using this for the new dtw/MFA/voiceless combination
+
+@app.post('/transcribe/')
+async def transcribe(
+    file: UploadFile= File(...)
+):
+    temp_path = "temp.wav"
+    with open(temp_path, "wb") as f:
+        f.write(await file.read())
+
+    # model = whisper.load_model("base")  # You can try "tiny", "base", "small", "medium", "large"
+
+    # result = model.transcribe(temp_path, language="zh", initial_prompt='你好！你今天怎么样？')
+
+    model = WhisperModel("base", device="cpu", compute_type="int8")  # 'cuda' if on GPU
+
+    segments, info = model.transcribe(temp_path, word_timestamps=True, initial_prompt="你好，你今天怎么样？")
+
+
+    return segments
+
+
+@app.post("/dtw_new/")
+async def dtw_new(
+    reference_pitch: str = Form(...),
+    user_pitch: str = Form(...)
+):
+    reference_pitch = json.loads(reference_pitch)
+    user_pitch = json.loads(user_pitch)
+    
+    model = whisper.load_model("base")  # You can try "tiny", "base", "small", "medium", "large"
+
+    result = model.transcribe("your_audio_file.wav")  # .mp3/.m4a/.webm also supported
+
+    for segment in result['segments']:
+        print(f"[{segment['start']:.2f}s - {segment['end']:.2f}s] {segment['text']}")

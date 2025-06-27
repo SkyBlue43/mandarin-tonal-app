@@ -40,7 +40,7 @@ export default function Time({
       if (data) {
         setUserPitch(data.pitch);
         if (referencePitch.length > 0) {
-          DTW(data.pitch, referencePitch);
+          transcribeAudio(userBlob, "recording" + chosenAudio);
         }
       }
     };
@@ -50,6 +50,18 @@ export default function Time({
     }
   }, [userBlob, chosenAudio]);
 
+  
+  const transcribeAudio = async (audio_blob: Blob | null, audio_location: string) => {
+    if (audio_blob === null) { return null}
+    const formData = new FormData();
+    formData.append('file', audio_blob, audio_location);
+    const result = await fetch('http://localhost:8000/transcribe', {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await result.json();
+    console.log('Transcribed data:', data);
+  }
 
   const analyzeAudio = async (audio_blob: Blob | null, audio_location: string) => {
     if (audio_blob === null) { return null }
@@ -87,7 +99,7 @@ export default function Time({
       frequency: userPitch.map(p => p.frequency),
       time: userPitch.map(p => p.time)
     }));
-    const result = await fetch('http://localhost:8000/dtw', {
+    const result = await fetch('http://localhost:8000/dtw_new', {
       method: 'POST',
       body: formData
     });
