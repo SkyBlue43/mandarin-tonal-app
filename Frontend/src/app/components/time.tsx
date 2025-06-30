@@ -44,9 +44,10 @@ export default function Time({
         if (referencePitch.length > 0) {
           const user_words_array = await transcribeAudio(userBlob, "recording" + chosenAudio);
           setUserWordsArray(user_words_array);
+          console.log(user_words_array);
           const reference_words_array = await transcribeAudio(referenceBlob, "recording" + chosenAudio)
           setReferenceWordsArray(reference_words_array);
-          // DTW(userPitch, referencePitch, userWordsArray, referenceWordsArray);
+          DTW(userPitch, referencePitch, user_words_array, reference_words_array);
 
         }
       }
@@ -68,7 +69,8 @@ export default function Time({
     });
     const data = await result.json();
     console.log('Transcribed data:', data);
-    return data.segments
+    const wordsArray = data[0]?.words || [];
+    return wordsArray;
   }
 
   const analyzeAudio = async (audio_blob: Blob | null, audio_location: string) => {

@@ -339,6 +339,4 @@ async def dtw_new(
     words_user_data = json.loads(words_user)
     words_reference_data = json.loads(words_reference)
 
-    print(reference_pitch, user_pitch, words_reference_data, words_user_data)
-
     return
