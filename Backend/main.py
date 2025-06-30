@@ -10,6 +10,7 @@ import shutil, os, subprocess
 from textgrid import TextGrid
 import whisper
 from faster_whisper import WhisperModel
+import uuid
 
 app = FastAPI()
 
@@ -308,9 +309,10 @@ async def mfa(
 async def transcribe(
     file: UploadFile= File(...)
 ):
-    temp_path = "temp.wav"
-    with open(temp_path, "wb") as f:
+    unique_filename = f"temp_{uuid.uuid4().hex}.wav"
+    with open(unique_filename, "wb") as f:
         f.write(await file.read())
+
 
     # model = whisper.load_model("base")  # You can try "tiny", "base", "small", "medium", "large"
 
@@ -318,8 +320,9 @@ async def transcribe(
 
     model = WhisperModel("base", device="cpu", compute_type="int8")  # 'cuda' if on GPU
 
-    segments, info = model.transcribe(temp_path, word_timestamps=True, initial_prompt="你好，你今天怎么样？")
+    segments, info = model.transcribe(unique_filename, word_timestamps=True, initial_prompt="你好，你今天怎么样？")
 
+    os.remove(unique_filename)
 
     return segments
 

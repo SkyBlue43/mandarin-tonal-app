@@ -46,7 +46,7 @@ export default function Time({
           setUserWordsArray(user_words_array);
           const reference_words_array = await transcribeAudio(referenceBlob, "recording" + chosenAudio)
           setReferenceWordsArray(reference_words_array);
-          DTW(userPitch, referencePitch, userWordsArray, referenceWordsArray);
+          // DTW(userPitch, referencePitch, userWordsArray, referenceWordsArray);
 
         }
       }
