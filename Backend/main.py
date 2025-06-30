@@ -327,14 +327,15 @@ async def transcribe(
 @app.post("/dtw_new/")
 async def dtw_new(
     reference_pitch: str = Form(...),
-    user_pitch: str = Form(...)
+    user_pitch: str = Form(...),
+    words_user: str = Form(...),
+    words_reference: str = Form(...)
 ):
     reference_pitch = json.loads(reference_pitch)
     user_pitch = json.loads(user_pitch)
-    
-    model = whisper.load_model("base")  # You can try "tiny", "base", "small", "medium", "large"
+    words_user_data = json.loads(words_user)
+    words_reference_data = json.loads(words_reference)
 
-    result = model.transcribe("your_audio_file.wav")  # .mp3/.m4a/.webm also supported
+    print(reference_pitch, user_pitch, words_reference_data, words_user_data)
 
-    for segment in result['segments']:
-        print(f"[{segment['start']:.2f}s - {segment['end']:.2f}s] {segment['text']}")
+    return

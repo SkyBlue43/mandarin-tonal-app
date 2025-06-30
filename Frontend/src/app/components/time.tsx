@@ -22,6 +22,8 @@ export default function Time({
   const [userPitch, setUserPitch] = useState<PitchPoint[]>([]);
   const [referencePitch, setReferencePitch] = useState<PitchPoint[]>([]);
   const [alignedGraphData, setAlignedGraphData] = useState<any[]>([]);
+  const [userWordsArray, setUserWordsArray] = useState<any[]>([])
+  const [referenceWordsArray, setReferenceWordsArray] = useState<any[]>([])
 
   useEffect(() => {
     const analyzeReference = async () => {
@@ -40,7 +42,12 @@ export default function Time({
       if (data) {
         setUserPitch(data.pitch);
         if (referencePitch.length > 0) {
-          transcribeAudio(userBlob, "recording" + chosenAudio);
+          const user_words_array = await transcribeAudio(userBlob, "recording" + chosenAudio);
+          setUserWordsArray(user_words_array);
+          const reference_words_array = await transcribeAudio(referenceBlob, "recording" + chosenAudio)
+          setReferenceWordsArray(reference_words_array);
+          DTW(userPitch, referencePitch, userWordsArray, referenceWordsArray);
+
         }
       }
     };
@@ -61,6 +68,7 @@ export default function Time({
     });
     const data = await result.json();
     console.log('Transcribed data:', data);
+    return data.segments
   }
 
   const analyzeAudio = async (audio_blob: Blob | null, audio_location: string) => {
@@ -76,6 +84,27 @@ export default function Time({
     return data
   };
 
+  const DTW = async (userPitch: PitchPoint[], referencePitch: PitchPoint[], userWordArray: any[], referenceWordArray: any[]) => {
+    const formData = new FormData();
+    formData.append('reference_pitch', JSON.stringify({
+      frequency: referencePitch.map(p => p.frequency),
+      time: referencePitch.map(p => p.time)
+    }));
+    formData.append('user_pitch', JSON.stringify({
+      frequency: userPitch.map(p => p.frequency),
+      time: userPitch.map(p => p.time)
+    }));
+    formData.append('words_user', JSON.stringify(userWordArray));
+    formData.append('words_reference', JSON.stringify(referenceWordArray));
+    const result = await fetch('http://localhost:8000/dtw_new', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await result.json();
+    console.log("DTW result:", data);
+    setAlignedGraphData(data.aligned);
+  };
+
 
   function countMatches(aligned: any[], tolerance = 15): number {
     let totalPoints = aligned.length;
@@ -88,26 +117,6 @@ export default function Time({
     });
     return totalPoints > 0 ? correctPoints / totalPoints : 0;
   }
-
-  const DTW = async (userPitch: PitchPoint[], referencePitch: PitchPoint[]) => {
-    const formData = new FormData();
-    formData.append('data_reference', JSON.stringify({
-      frequency: referencePitch.map(p => p.frequency),
-      time: referencePitch.map(p => p.time)
-    }));
-    formData.append('data_user', JSON.stringify({
-      frequency: userPitch.map(p => p.frequency),
-      time: userPitch.map(p => p.time)
-    }));
-    const result = await fetch('http://localhost:8000/dtw_new', {
-      method: 'POST',
-      body: formData
-    });
-    const data = await result.json();
-    console.log("DTW result:", data);
-    setAlignedGraphData(data.aligned);
-  };
-
 
   return (
     <>
