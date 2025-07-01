@@ -137,20 +137,32 @@ async def analyze_audio(file: UploadFile = File(...)):
     pitch = sound.to_pitch()
 
     pitch_values = []
+    min_freq = float('inf')
+    max_freq = 0
     for i in range(pitch.get_number_of_frames()):
         time = pitch.get_time_from_frame_number(i + 1)
         freq = pitch.get_value_in_frame(i + 1)
         if not np.isnan(freq) and freq > 0:
-            semitone = 12 * np.log2(freq)
-            pitch_values.append({"time": time, "frequency": semitone})
+            log_pitch = np.log2(freq)
+            pitch_values.append({"time": time, "frequency": log_pitch})
+            if log_pitch < min_freq:
+                min_freq = log_pitch
+            if log_pitch > max_freq:
+                max_freq = log_pitch
         else:
             pitch_values.append({"time": time, "frequency": None})  # or null in JSON
 
+    norm_pitch_values = []
+    for pitch in pitch_values:
+        freq = pitch['frequency']
+        if freq is not None:
+            freq = (pitch['frequency'] - min_freq) / (max_freq - min_freq)
+        norm_pitch_values.append({"time": pitch['time'], 'frequency': freq})
 
     os.remove(input_path)
     os.remove(output_path)
 
-    return {"pitch": pitch_values}
+    return {"pitch": norm_pitch_values}
 
 
 # REWRITE THIS CODE!!!
@@ -313,13 +325,10 @@ async def transcribe(
     with open(unique_filename, "wb") as f:
         f.write(await file.read())
 
-
     # model = whisper.load_model("base")  # You can try "tiny", "base", "small", "medium", "large"
-
     # result = model.transcribe(temp_path, language="zh", initial_prompt='你好！你今天怎么样？')
 
     model = WhisperModel("base", device="cpu", compute_type="int8")  # 'cuda' if on GPU
-
     segments, info = model.transcribe(unique_filename, word_timestamps=True, initial_prompt="你好，你今天怎么样？")
 
     os.remove(unique_filename)
@@ -339,4 +348,18 @@ async def dtw_new(
     words_user_data = json.loads(words_user)
     words_reference_data = json.loads(words_reference)
 
-    return
+    if len(words_user_data) == len(words_reference_data):
+        for user, ref in zip(words_user_data, words_reference_data):
+            user_phrase = []
+            ref_phrase = []
+            for pitch in user_pitch:
+                if pitch.time >= user['start'] and pitch.time <= user['end']:
+                    user_phrase.append(pitch)
+            for pitch in reference_pitch:
+                if pitch.time >= ref['start'] and pitch.time <= user['end']:
+                    ref_phrase.append(pitch)
+            
+    else:
+        return "error"
+
+    return "error"

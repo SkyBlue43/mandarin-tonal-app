@@ -77,7 +77,7 @@ export default function Time({
     if (audio_blob === null) { return null }
     const formData = new FormData();
     formData.append('file', audio_blob, audio_location);
-    const result = await fetch('http://localhost:8000/analyze-audio', {
+    const result = await fetch('http://localhost:8000/analyze-audio-voiceless', {
       method: 'POST',
       body: formData,
     });
