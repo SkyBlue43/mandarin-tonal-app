@@ -4,6 +4,7 @@ import Default from '@/app/components/default';
 import Time from '@/app/components/time';
 import MFA from '@/app/components/mfa';
 import Voiceless from '@/app/components/voiceless';
+import Characters from '@/app/components/characters';
 import { useRouter } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import { Mic, Play, Square } from 'lucide-react';
@@ -102,6 +103,12 @@ export default function Main() {
           onClick={() => setTestChoice(2)}>
           Voiceless
         </button>
+
+        <button
+          className={`p-3 rounded-2xl ${testChoice != 3 ? 'bg-pink-500 hover:bg-pink-600 w-30' : 'bg-white border border-2 border-pink-500 text-pink-500'}`}
+          onClick={() => setTestChoice(3)}>
+          Characters
+        </button>
       </header>
 
       <h1>{chosenPhrase}</h1>
@@ -124,7 +131,7 @@ export default function Main() {
           referenceBlob={referenceBlob}
           chosenAudio={chosenAudio}
         /></div>
-        
+
 
         <div>
           {/* This is where the audio recording(s) should go */}
@@ -150,6 +157,14 @@ export default function Main() {
 
           {testChoice === 2 && (
             <Voiceless
+              userBlob={userBlob}
+              referenceBlob={referenceBlob}
+              chosenAudio={chosenAudio}
+            />
+          )}
+
+          {testChoice === 3 && (
+            <Characters
               userBlob={userBlob}
               referenceBlob={referenceBlob}
               chosenAudio={chosenAudio}
