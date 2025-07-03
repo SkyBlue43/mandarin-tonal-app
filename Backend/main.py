@@ -11,6 +11,7 @@ from textgrid import TextGrid
 import whisper
 from faster_whisper import WhisperModel
 import uuid
+import soundfile as sf
 
 app = FastAPI()
 
@@ -321,15 +322,19 @@ async def mfa(
 async def transcribe(
     file: UploadFile= File(...)
 ):
-    unique_filename = f"temp_{uuid.uuid4().hex}.wav"
+    
+    print(file.filename)
+    print(file.content_type)
+
+    unique_filename = "temp.mp3"
     with open(unique_filename, "wb") as f:
-        f.write(await file.read())
+        shutil.copyfileobj(file.file, f)
 
     # model = whisper.load_model("base")  # You can try "tiny", "base", "small", "medium", "large"
     # result = model.transcribe(temp_path, language="zh", initial_prompt='你好！你今天怎么样？')
 
     model = WhisperModel("base", device="cpu", compute_type="int8")  # 'cuda' if on GPU
-    segments, info = model.transcribe(unique_filename, word_timestamps=True, initial_prompt="你好，你今天怎么样？")
+    segments, info = model.transcribe(unique_filename, language='zh', word_timestamps=True, initial_prompt="你好，你今天怎么样？")
 
     os.remove(unique_filename)
 
@@ -349,6 +354,7 @@ async def dtw_new(
     words_reference_data = json.loads(words_reference)
 
     if len(words_user_data) == len(words_reference_data):
+        alignment = []
         for user, ref in zip(words_user_data, words_reference_data):
             user_phrase = []
             ref_phrase = []
@@ -356,10 +362,18 @@ async def dtw_new(
                 if pitch.time >= user['start'] and pitch.time <= user['end']:
                     user_phrase.append(pitch)
             for pitch in reference_pitch:
-                if pitch.time >= ref['start'] and pitch.time <= user['end']:
+                if pitch.time >= ref['start'] and pitch.time <= ref['end']:
                     ref_phrase.append(pitch)
-            
+            user_series = [(f.frequency,) for f in user_phrase if f.frequency is not None]
+            reference_series = [(f.frequency,) for f in ref_phrase if f.frequency is not None]
+            path, dist = fastdtw(user_series, reference_series, dist=euclidean)
+            if dist < 50:
+                for i, j in path:
+                    alignment.append({
+                        "time": ref_phrase[i]["time"],
+                        "reference": ref_phrase[i],
+                        "user": user_phrase[j]
+                    })
+        return {"alignment": alignment}
     else:
         return "error"
-
-    return "error"
