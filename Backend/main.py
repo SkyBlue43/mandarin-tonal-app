@@ -12,6 +12,7 @@ import whisper
 from faster_whisper import WhisperModel
 import uuid
 import soundfile as sf
+from zhon.hanzi import punctuation
 
 app = FastAPI()
 
@@ -377,3 +378,65 @@ async def dtw_new(
         return {"alignment": alignment}
     else:
         return "error"
+
+
+@app.post("/dtw_characters/")
+async def dtw_new(
+    reference_pitch: str = Form(...),
+    user_pitch: str = Form(...),
+    words_reference: str = Form(...)
+):
+    reference_pitch = json.loads(reference_pitch)
+    user_pitch = json.loads(user_pitch)
+    words_reference_data = json.loads(words_reference)
+
+
+    characters = []
+    for i in range(len(words_reference_data)):
+        if len(words_reference_data[i]['word']) > 1:
+            individual = words_reference_data[i]['word'].strip().strip(punctuation)
+            start = words_reference_data[i]['start']
+            end = words_reference_data[i]['end']
+            time_per = (end - start) / len(individual)
+            end = start
+            for char in individual:
+                end = end + time_per
+                characters.append({"char": char, "start": start, "end": end})
+                start = end
+        else:
+            start = words_reference_data[i]['start']
+            end = words_reference_data[i]['end']
+            characters.append({"char": words_reference_data[i]['word'], "start": start, "end": end})
+
+    alignment = {'frequency': [], 'time': [], 'character': []}
+    is_char = False
+    for pitch, time in zip(reference_pitch['frequency'], reference_pitch['time']):
+        if pitch == None and not is_char:
+            alignment['frequency'].append(pitch)
+            alignment['time'].append(time)
+            alignment['character'].append(None)
+        elif pitch is not None:
+            if len(characters) == 0:
+                break
+            if time > characters[0]['end']:
+                characters.pop(0)
+                is_char = False
+                alignment['frequency'].append(None)
+                alignment['time'].append(time)
+                alignment['character'].append(None)
+            elif time < characters[0]['start']:
+                alignment['frequency'].append(None)
+                alignment['time'].append(time)
+                alignment['character'].append(None)
+            else:
+                alignment['frequency'].append(pitch)
+                alignment['time'].append(time)
+                alignment['character'].append(characters[0]['char'])
+                is_char = True
+        elif pitch == None and is_char:
+            characters.pop(0)
+            is_char = False
+            alignment['frequency'].append(pitch)
+            alignment['time'].append(time)
+            alignment['character'].append(None)  
+    pass
