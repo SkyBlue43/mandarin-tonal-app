@@ -44,7 +44,7 @@ export default function Characters({
         if (referencePitch.length > 0) {
           const reference_words_array = await transcribeAudio(referenceBlob, "recording" + chosenAudio)
           setReferenceWordsArray(reference_words_array);
-          DTW(userPitch, referencePitch, reference_words_array);
+          DTW(data.pitch, referencePitch, reference_words_array);
 
         }
       }
