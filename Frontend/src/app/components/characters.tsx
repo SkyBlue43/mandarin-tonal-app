@@ -42,9 +42,13 @@ export default function Characters({
       if (data) {
         setUserPitch(data.pitch);
         if (referencePitch.length > 0) {
-          const reference_words_array = await transcribeAudio(referenceBlob, "recording" + chosenAudio)
+          const reference_words_array = await transcribeAudio(referenceBlob, "recording" + chosenAudio);
           setReferenceWordsArray(reference_words_array);
-          DTW(data.pitch, referencePitch, reference_words_array);
+          console.log('Reference Array: ', reference_words_array);
+          const user_words_array = await transcribeAudio(userBlob, "recording2" + chosenAudio);
+          setUserWordsArray(user_words_array);
+          console.log('User Array: ', user_words_array);
+          DTW(data.pitch, referencePitch, reference_words_array, user_words_array);
 
         }
       }
@@ -65,7 +69,7 @@ export default function Characters({
       body: formData,
     });
     const data = await result.json();
-    console.log('Transcribed data:', data);
+    console.log('Transcribed data: ', data);
     const wordsArray = data[0]?.words || [];
     return wordsArray;
   }
@@ -83,7 +87,7 @@ export default function Characters({
     return data
   };
 
-  const DTW = async (userPitch: PitchPoint[], referencePitch: PitchPoint[], referenceWordArray: any[]) => {
+  const DTW = async (userPitch: PitchPoint[], referencePitch: PitchPoint[], referenceWordArray: any[], userWordArray: any[]) => {
     const formData = new FormData();
     formData.append('reference_pitch', JSON.stringify({
       frequency: referencePitch.map(p => p.frequency),
@@ -94,13 +98,14 @@ export default function Characters({
       time: userPitch.map(p => p.time)
     }));
     formData.append('words_reference', JSON.stringify(referenceWordArray));
-    const result = await fetch('http://localhost:8000/dtw_characters', {
+    formData.append('words_user', JSON.stringify(userWordArray));
+    const result = await fetch('/dtw_characters', {
       method: 'POST',
       body: formData
     });
     const data = await result.json();
     console.log("DTW result:", data);
-    setAlignedGraphData(data.aligned);
+    setAlignedGraphData(data.alignement);
   };
 
 
